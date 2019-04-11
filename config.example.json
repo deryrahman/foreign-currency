@@ -1,0 +1,13 @@
+{
+    "server": {
+        "Host": "localhost",
+        "Port": "8000"
+    },
+    "database": {
+        "Host": "localhost",
+        "Port": "1234",
+        "User": "dery",
+        "Password": "dery",
+        "DBName": "foreigncurrency"
+    }
+}
