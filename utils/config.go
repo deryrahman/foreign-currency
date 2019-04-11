@@ -27,10 +27,16 @@ type database struct {
 
 // ParseJSON is used to parse config json file
 func ParseJSON(filepath string) (*Configuration, error) {
-	file, _ := os.Open(filepath)
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	configuration := &Configuration{}
-	decoder.Decode(configuration)
+	err = decoder.Decode(configuration)
+	if err != nil {
+		return nil, err
+	}
 	return configuration, nil
 }
