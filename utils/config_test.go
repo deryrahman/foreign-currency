@@ -13,6 +13,13 @@ func assertString(t *testing.T, got, want string) {
 	}
 }
 
+func assertError(t *testing.T, err error, wantMsg string) {
+	if err == nil {
+		t.Errorf("wanted an error")
+	}
+	assertString(t, err.Error(), wantMsg)
+}
+
 func TestParseJSON(t *testing.T) {
 	confBody := []byte(`{
 		"server": {
@@ -46,7 +53,5 @@ func TestParseJSON_fail(t *testing.T) {
 	if configuration != nil {
 		t.Errorf("should return nil")
 	}
-	if err == nil {
-		t.Errorf("wanted an error")
-	}
+	assertError(t, err, "open ./conf.json: no such file or directory")
 }
