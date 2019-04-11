@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+func assertString(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
+}
+
 func TestParseJSON(t *testing.T) {
 	confBody := []byte(`{
 		"server": {
@@ -25,39 +32,11 @@ func TestParseJSON(t *testing.T) {
 
 	configuration, _ := ParseJSON("./conf.json")
 
-	want := "123.456.789.0"
-	got := configuration.Server.Host
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "8000"
-	got = configuration.Server.Port
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "localhost"
-	got = configuration.Database.Host
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "1234"
-	got = configuration.Database.Port
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "dery"
-	got = configuration.Database.User
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "rahman"
-	got = configuration.Database.Password
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-	want = "foreigncurrency"
-	got = configuration.Database.DBName
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
+	assertString(t, configuration.Server.Host, "123.456.789.0")
+	assertString(t, configuration.Server.Port, "8000")
+	assertString(t, configuration.Database.Host, "localhost")
+	assertString(t, configuration.Database.Port, "1234")
+	assertString(t, configuration.Database.User, "dery")
+	assertString(t, configuration.Database.Password, "rahman")
+	assertString(t, configuration.Database.DBName, "foreigncurrency")
 }
