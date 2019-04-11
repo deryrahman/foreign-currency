@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"encoding/json"
+	"os"
+)
+
 // Configuration is a struct for configuration
 // It contains server and database configuration
 type Configuration struct {
@@ -22,5 +27,10 @@ type database struct {
 
 // ParseJSON is used to parse config json file
 func ParseJSON(filepath string) (*Configuration, error) {
-	return &Configuration{}, nil
+	file, _ := os.Open(filepath)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	configuration := &Configuration{}
+	decoder.Decode(configuration)
+	return configuration, nil
 }
