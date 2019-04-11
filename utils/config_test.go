@@ -40,3 +40,13 @@ func TestParseJSON(t *testing.T) {
 	assertString(t, configuration.Database.Password, "rahman")
 	assertString(t, configuration.Database.DBName, "foreigncurrency")
 }
+
+func TestParseJSON_fail(t *testing.T) {
+	configuration, err := ParseJSON("./conf.json")
+	if configuration != nil {
+		t.Errorf("should return nil")
+	}
+	if err == nil {
+		t.Errorf("wanted an error")
+	}
+}
