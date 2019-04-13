@@ -9,6 +9,7 @@ import (
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/deryrahman/foreign-currency/config"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func newDB(t *testing.T) *gorm.DB {
