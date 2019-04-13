@@ -18,7 +18,7 @@ func newDB(t *testing.T) *gorm.DB {
 		log.Fatalf("couldn't parse config. %s\n", err.Error())
 	}
 	database := configuration.Database
-	dsl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", database.User, database.Password, database.Host, database.Port, database.DBName)
+	dsl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local", database.User, database.Password, database.Host, database.Port, database.DBName)
 	db, err := gorm.Open("mysql", dsl)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -116,7 +116,9 @@ func TestStore_exist(t *testing.T) {
 	currencies := []app.Currency{
 		app.Currency{From: "USD", To: "SGD"},
 	}
-	ti := time.Now()
+	const RFC3339FullDate = "2006-01-02"
+	ti, _ := time.Parse(RFC3339FullDate, "2019-08-12")
+
 	rates := []app.Rate{
 		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
 	}
