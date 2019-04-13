@@ -48,5 +48,6 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 
 // Store is a method to store new currency into database
 func (repo *RDBMSRepo) Store(currency *app.Currency) error {
+	repo.DB.Create(currency)
 	return nil
 }
