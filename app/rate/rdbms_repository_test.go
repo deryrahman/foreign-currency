@@ -74,6 +74,33 @@ func TestFetch(t *testing.T) {
 	}
 }
 
+func TestFetchBetweenDate(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD"},
+	}
+
+	const RFC3339FullDate = "2006-01-02"
+	rates := []app.Rate{}
+	db.Create(&currencies[0])
+	for i := 0; i < 11; i++ {
+		ti, _ := time.Parse(RFC3339FullDate, fmt.Sprintf("2019-08-%02d", 12+i))
+		rate := app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1}
+		rates = append(rates, rate)
+		db.Create(&rates[i])
+	}
+
+	repo := CreateRDBMSRepo(db)
+	from, _ := time.Parse(RFC3339FullDate, "2019-08-01")
+	to, _ := time.Parse(RFC3339FullDate, "2019-08-15")
+	gots, _ := repo.FetchBetweenDate(&from, &to)
+	assertInt(t, len(gots), 3)
+	for i := range gots {
+		assertUint(t, gots[i].ID, uint(i+1))
+	}
+}
+
 func TestStore(t *testing.T) {
 	db := newDB(t)
 	defer db.Close()
