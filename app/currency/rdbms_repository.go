@@ -18,7 +18,13 @@ func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo {
 // Fetch is a method to fetch all currency that match with query
 // It should return ErrNotFound if currency didn't found
 func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
-	return nil, nil
+	currencies := []app.Currency{}
+	repo.DB.Find(&currencies)
+	result := make([]*app.Currency, len(currencies))
+	for i, v := range currencies {
+		result[i] = &v
+	}
+	return result, nil
 }
 
 // FetchOne is a method to fetch one currency pair
