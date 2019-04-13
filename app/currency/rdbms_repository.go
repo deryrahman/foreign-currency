@@ -1,6 +1,8 @@
 package currency
 
 import (
+	"errors"
+
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/jinzhu/gorm"
 )
@@ -48,6 +50,11 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 
 // Store is a method to store new currency into database
 func (repo *RDBMSRepo) Store(currency *app.Currency) error {
+	repo.DB.First(currency, "currencies.from = ? AND currencies.to = ?", currency.From, currency.To)
+	ok := repo.DB.NewRecord(currency)
+	if !ok {
+		return errors.New("currency exist")
+	}
 	repo.DB.Create(currency)
 	return nil
 }
