@@ -53,13 +53,13 @@ func TestFetch(t *testing.T) {
 	db := newDB(t)
 	defer db.Close()
 	currencies := []app.Currency{
-		app.Currency{ID: 1, From: "USD", To: "SGD"},
+		app.Currency{From: "USD", To: "SGD"},
 	}
 	db.Create(&currencies[0])
 
 	repo := CreateRDBMSRepo(db)
 	gots, _ := repo.Fetch()
-	assertUint(t, gots[0].ID, currencies[0].ID)
+	assertUint(t, gots[0].ID, 1)
 	assertString(t, gots[0].From, currencies[0].From)
 	assertString(t, gots[0].To, currencies[0].To)
 }
@@ -69,7 +69,7 @@ func TestFetchOne_fullRates(t *testing.T) {
 	defer db.Close()
 
 	currencies := []app.Currency{
-		app.Currency{ID: 1, From: "USD", To: "SGD"},
+		app.Currency{From: "USD", To: "SGD"},
 	}
 	ti := time.Now()
 	rates := []app.Rate{
@@ -91,7 +91,7 @@ func TestFetchOne_fullRates(t *testing.T) {
 	}
 	repo := CreateRDBMSRepo(db)
 	got, _ := repo.FetchOne("USD", "SGD", -1)
-	assertUint(t, got.ID, currencies[0].ID)
+	assertUint(t, got.ID, 1)
 	assertString(t, got.From, currencies[0].From)
 	assertString(t, got.To, currencies[0].To)
 	assertInt(t, len(got.Rates), 11)
@@ -101,7 +101,7 @@ func TestFetchOne_partialRates(t *testing.T) {
 	defer db.Close()
 
 	currencies := []app.Currency{
-		app.Currency{ID: 1, From: "USD", To: "SGD"},
+		app.Currency{From: "USD", To: "SGD"},
 	}
 	ti := time.Now()
 	rates := []app.Rate{
@@ -123,8 +123,26 @@ func TestFetchOne_partialRates(t *testing.T) {
 	}
 	repo := CreateRDBMSRepo(db)
 	got, _ := repo.FetchOne("USD", "SGD", 3)
-	assertUint(t, got.ID, currencies[0].ID)
+	assertUint(t, got.ID, 1)
 	assertString(t, got.From, currencies[0].From)
 	assertString(t, got.To, currencies[0].To)
 	assertInt(t, len(got.Rates), 3)
+}
+
+func TestStore(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD"},
+	}
+	repo := CreateRDBMSRepo(db)
+	repo.Store(&currencies[0])
+
+	got := app.Currency{}
+	db.First(&got, "currencies.from = ? AND currencies.to = ?", "USD", "SGD")
+
+	assertUint(t, got.ID, 1)
+	assertString(t, got.From, currencies[0].From)
+	assertString(t, got.To, currencies[0].To)
 }
