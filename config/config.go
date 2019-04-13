@@ -8,8 +8,9 @@ import (
 // Configuration is a struct for configuration
 // It contains server and database configuration
 type Configuration struct {
-	Server   *server
-	Database *database
+	Server       *server
+	DatabaseDev  *database
+	DatabaseTest *database
 }
 
 type server struct {

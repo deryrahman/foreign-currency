@@ -13,11 +13,11 @@ import (
 )
 
 func newDB(t *testing.T) *gorm.DB {
-	configuration, err := config.ParseJSON("../../config.test.json")
+	configuration, err := config.ParseJSON("../../config.json")
 	if err != nil {
 		log.Fatalf("couldn't parse config. %s\n", err.Error())
 	}
-	database := configuration.Database
+	database := configuration.DatabaseTest
 	dsl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", database.User, database.Password, database.Host, database.Port, database.DBName)
 	db, err := gorm.Open("mysql", dsl)
 	if err != nil {

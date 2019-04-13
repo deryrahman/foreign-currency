@@ -1,13 +1,20 @@
 {
-    "server": {
+    "Server": {
         "Host": "localhost",
         "Port": "8000"
     },
-    "database": {
+    "DatabaseDev": {
         "Host": "localhost",
         "Port": "1234",
         "User": "dery",
         "Password": "dery",
         "DBName": "foreigncurrency"
+    },
+    "DatabaseTest": {
+        "Host": "localhost",
+        "Port": "1234",
+        "User": "dery",
+        "Password": "dery",
+        "DBName": "test"
     }
 }
