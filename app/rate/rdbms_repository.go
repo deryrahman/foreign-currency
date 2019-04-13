@@ -27,5 +27,6 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 
 // Store is a method to store new daily rate into database
 func (repo *RDBMSRepo) Store(rate *app.Rate) error {
+	repo.DB.Create(rate)
 	return nil
 }
