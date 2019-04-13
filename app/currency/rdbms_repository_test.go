@@ -146,3 +146,21 @@ func TestStore(t *testing.T) {
 	assertString(t, got.From, currencies[0].From)
 	assertString(t, got.To, currencies[0].To)
 }
+
+func TestStore_exist(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD"},
+	}
+	db.Create(&currencies[0])
+	currencies[0].ID = 0
+
+	repo := CreateRDBMSRepo(db)
+	err := repo.Store(&currencies[0])
+
+	if err == nil {
+		t.Errorf("wanted an error")
+	}
+}
