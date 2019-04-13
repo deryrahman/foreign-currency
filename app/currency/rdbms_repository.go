@@ -35,7 +35,13 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
 func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	currency := app.Currency{}
 	rates := []app.Rate{}
-	repo.DB.First(&currency, "from = ? AND to = ?", from, to).Order("rates.date DESC").Related(&rates)
+	if lastNRates == 0 {
+		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to)
+	} else if lastNRates < 0 {
+		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Related(&rates)
+	} else {
+		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Limit(lastNRates).Related(&rates)
+	}
 	currency.Rates = rates
 	return &currency, nil
 }
