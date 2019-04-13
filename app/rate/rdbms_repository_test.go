@@ -73,3 +73,38 @@ func TestFetch(t *testing.T) {
 		assertUint(t, gots[i].ID, uint(i+1))
 	}
 }
+
+func TestStore(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD"},
+	}
+	ti := time.Now()
+	rates := []app.Rate{
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+	}
+	db.Create(&currencies[0])
+	repo := CreateRDBMSRepo(db)
+
+	for i := range rates {
+		repo.Store(&rates[i])
+	}
+
+	gots := []app.Rate{}
+	db.Find(&gots, "rates.currency_id = ?", 1)
+	for i := range rates {
+		assertUint(t, gots[i].ID, uint(i+1))
+	}
+}
