@@ -33,7 +33,11 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
 // If lastNRates is negative, return all Rates, get latest N rates otherwise
 // It should return ErrNotFound if currency didn't found
 func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
-	return nil, nil
+	currency := app.Currency{}
+	rates := []app.Rate{}
+	repo.DB.First(&currency, "from = ? AND to = ?", from, to).Order("rates.date DESC").Related(&rates)
+	currency.Rates = rates
+	return &currency, nil
 }
 
 // Store is a method to store new currency into database
