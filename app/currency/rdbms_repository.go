@@ -49,6 +49,7 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 }
 
 // Store is a method to store new currency into database
+// If there's existing currency (same from and date), this method will throw error
 func (repo *RDBMSRepo) Store(currency *app.Currency) error {
 	repo.DB.First(currency, "currencies.from = ? AND currencies.to = ?", currency.From, currency.To)
 	ok := repo.DB.NewRecord(currency)

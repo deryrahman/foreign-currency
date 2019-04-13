@@ -40,6 +40,7 @@ func (repo *RDBMSRepo) FetchBetweenDate(from *time.Time, to *time.Time) ([]*app.
 }
 
 // Store is a method to store new daily rate into database
+// If there's existing rate (same date), this method will throw error
 func (repo *RDBMSRepo) Store(rate *app.Rate) error {
 	repo.DB.First(rate, "rates.date = ?", rate.Date)
 	ok := repo.DB.NewRecord(rate)
