@@ -1,6 +1,8 @@
 package rate
 
 import (
+	"errors"
+
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/jinzhu/gorm"
 )
@@ -27,6 +29,11 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 
 // Store is a method to store new daily rate into database
 func (repo *RDBMSRepo) Store(rate *app.Rate) error {
+	repo.DB.First(rate, "rates.date = ?", rate.Date)
+	ok := repo.DB.NewRecord(rate)
+	if !ok {
+		return errors.New("rate exist")
+	}
 	repo.DB.Create(rate)
 	return nil
 }
