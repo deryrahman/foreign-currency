@@ -2,6 +2,7 @@ package rate
 
 import (
 	"errors"
+	"time"
 
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/jinzhu/gorm"
@@ -23,6 +24,17 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 	result := []*app.Rate{}
 	for i := range currencies {
 		result = append(result, &currencies[i])
+	}
+	return result, nil
+}
+
+// FetchBetweenDate is a method to fetch all rates within date
+func (repo *RDBMSRepo) FetchBetweenDate(from *time.Time, to *time.Time) ([]*app.Rate, error) {
+	rates := []app.Rate{}
+	repo.DB.Find(&rates, "rates.date BETWEEN ? AND ?", from, to)
+	result := []*app.Rate{}
+	for i := range rates {
+		result = append(result, &rates[i])
 	}
 	return result, nil
 }
