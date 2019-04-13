@@ -16,7 +16,13 @@ func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo {
 
 // Fetch is a method to fetch all rates
 func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
-	return nil, nil
+	currencies := []app.Rate{}
+	repo.DB.Find(&currencies)
+	result := []*app.Rate{}
+	for i := range currencies {
+		result = append(result, &currencies[i])
+	}
+	return result, nil
 }
 
 // Store is a method to store new daily rate into database
