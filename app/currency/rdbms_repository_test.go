@@ -1,20 +1,31 @@
 package currency
 
 import (
-	"regexp"
+	"fmt"
+	"log"
 	"testing"
 	"time"
 
 	"github.com/deryrahman/foreign-currency/app"
+	"github.com/deryrahman/foreign-currency/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func newDB() (sqlmock.Sqlmock, *gorm.DB) {
-	db, mock, _ := sqlmock.New()
-	gormDB, _ := gorm.Open("mysql", db)
-	return mock, gormDB
+func newDB(t *testing.T) *gorm.DB {
+	configuration, err := config.ParseJSON("../../config.test.json")
+	if err != nil {
+		log.Fatalf("couldn't parse config. %s\n", err.Error())
+	}
+	database := configuration.Database
+	dsl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", database.User, database.Password, database.Host, database.Port, database.DBName)
+	db, err := gorm.Open("mysql", dsl)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	db.DropTableIfExists(&app.Rate{}, &app.Currency{})
+	db.AutoMigrate(&app.Rate{}, &app.Currency{})
+	return db
 }
 
 func assertString(t *testing.T, got, want string) {
@@ -39,14 +50,12 @@ func assertInt(t *testing.T, got, want int) {
 }
 
 func TestFetch(t *testing.T) {
-	mock, db := newDB()
+	db := newDB(t)
 	defer db.Close()
 	currencies := []app.Currency{
 		app.Currency{ID: 1, From: "USD", To: "SGD"},
 	}
-	rows := mock.NewRows([]string{"id", "from", "to"}).
-		AddRow(currencies[0].ID, currencies[0].From, currencies[0].To)
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `currencies`")).WillReturnRows(rows)
+	db.Create(&currencies[0])
 
 	repo := CreateRDBMSRepo(db)
 	gots, _ := repo.Fetch()
@@ -55,39 +64,37 @@ func TestFetch(t *testing.T) {
 	assertString(t, gots[0].To, currencies[0].To)
 }
 
-func TestFetchOne_full(t *testing.T) {
-	mock, db := newDB()
+func TestFetchOne_fullRates(t *testing.T) {
+	db := newDB(t)
 	defer db.Close()
+
 	currencies := []app.Currency{
 		app.Currency{ID: 1, From: "USD", To: "SGD"},
 	}
 	ti := time.Now()
 	rates := []app.Rate{
-		app.Rate{ID: 1, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 2, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 3, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 4, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 5, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 6, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 7, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 8, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 9, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 10, Date: &ti, RateValue: 0.6, CurrencyID: 1},
-		app.Rate{ID: 11, Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
 	}
-	rowsCurrencies := mock.NewRows([]string{"id", "from", "to"}).
-		AddRow(currencies[0].ID, currencies[0].From, currencies[0].To)
-	rowsRates := mock.NewRows([]string{"id", "date", "rate_value", "currency_id"})
+	db.Create(&currencies[0])
 	for i := range rates {
-		rowsRates = rowsRates.AddRow(rates[i].ID, rates[i].Date, rates[i].RateValue, rates[i].CurrencyID)
+		db.Create(&rates[i])
 	}
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `currencies` WHERE (from = ? AND to = ?) ORDER BY `currencies`.`id` ASC LIMIT 1")).WillReturnRows(rowsCurrencies)
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `rates`  WHERE (`currency_id` = ?) ORDER BY rates.date DESC,`rates`.`id` ASC")).WillReturnRows(rowsRates)
-
 	repo := CreateRDBMSRepo(db)
 	got, _ := repo.FetchOne("USD", "SGD", -1)
 	assertUint(t, got.ID, currencies[0].ID)
 	assertString(t, got.From, currencies[0].From)
 	assertString(t, got.To, currencies[0].To)
 	assertInt(t, len(got.Rates), 11)
+}
+func TestFetchOne_partialRates(t *testing.T) {
 }
