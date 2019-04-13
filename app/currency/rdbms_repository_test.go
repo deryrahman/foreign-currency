@@ -97,4 +97,34 @@ func TestFetchOne_fullRates(t *testing.T) {
 	assertInt(t, len(got.Rates), 11)
 }
 func TestFetchOne_partialRates(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{ID: 1, From: "USD", To: "SGD"},
+	}
+	ti := time.Now()
+	rates := []app.Rate{
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+		app.Rate{Date: &ti, RateValue: 0.6, CurrencyID: 1},
+	}
+	db.Create(&currencies[0])
+	for i := range rates {
+		db.Create(&rates[i])
+	}
+	repo := CreateRDBMSRepo(db)
+	got, _ := repo.FetchOne("USD", "SGD", 3)
+	assertUint(t, got.ID, currencies[0].ID)
+	assertString(t, got.From, currencies[0].From)
+	assertString(t, got.To, currencies[0].To)
+	assertInt(t, len(got.Rates), 3)
 }
