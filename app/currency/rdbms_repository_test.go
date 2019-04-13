@@ -16,6 +16,20 @@ func newDB() (sqlmock.Sqlmock, *gorm.DB) {
 	return mock, gormDB
 }
 
+func assertString(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
+}
+
+func assertUint(t *testing.T, got, want uint) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%d' want '%d'", got, want)
+	}
+}
+
 func TestFetch(t *testing.T) {
 	mock, db := newDB()
 	defer db.Close()
@@ -28,13 +42,7 @@ func TestFetch(t *testing.T) {
 
 	repo := CreateRDBMSRepo(db)
 	gots, _ := repo.Fetch()
-	if gots[0].ID != currencies[0].ID {
-		t.Errorf("got '%d' want '%d'", gots[0].ID, currencies[0].ID)
-	}
-	if gots[0].From != currencies[0].From {
-		t.Errorf("got '%s' want '%s'", gots[0].From, currencies[0].From)
-	}
-	if gots[0].To != currencies[0].To {
-		t.Errorf("got '%s' want '%s'", gots[0].To, currencies[0].To)
-	}
+	assertUint(t, gots[0].ID, currencies[0].ID)
+	assertString(t, gots[0].From, currencies[0].From)
+	assertString(t, gots[0].To, currencies[0].To)
 }
