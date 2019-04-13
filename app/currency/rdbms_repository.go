@@ -23,8 +23,8 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
 	currencies := []app.Currency{}
 	repo.DB.Find(&currencies)
 	result := make([]*app.Currency, len(currencies))
-	for i, v := range currencies {
-		result[i] = &v
+	for i := range currencies {
+		result[i] = &currencies[i]
 	}
 	return result, nil
 }
