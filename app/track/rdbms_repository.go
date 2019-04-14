@@ -27,7 +27,9 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Track, error) {
 }
 
 // Store is a method to store currency rate to track
-func (repo *RDBMSRepo) Store(*app.Track) error {
+// If there's existing track (same currencyID and Revert), this method will throw error
+func (repo *RDBMSRepo) Store(track *app.Track) error {
+	repo.DB.Create(track)
 	return nil
 }
 
