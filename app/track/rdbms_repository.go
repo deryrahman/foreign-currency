@@ -1,6 +1,8 @@
 package track
 
 import (
+	"errors"
+
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/jinzhu/gorm"
 )
@@ -29,6 +31,11 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Track, error) {
 // Store is a method to store currency rate to track
 // If there's existing track (same currencyID and Revert), this method will throw error
 func (repo *RDBMSRepo) Store(track *app.Track) error {
+	repo.DB.First(track, "tracks.currency_id = ? AND tracks.revert = ?", track.CurrencyID, track.Revert)
+	ok := repo.DB.NewRecord(track)
+	if !ok {
+		return errors.New("track exist")
+	}
 	repo.DB.Create(track)
 	return nil
 }
