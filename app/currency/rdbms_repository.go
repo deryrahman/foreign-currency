@@ -1,8 +1,6 @@
 package currency
 
 import (
-	"errors"
-
 	"github.com/deryrahman/foreign-currency/app"
 	"github.com/jinzhu/gorm"
 )
@@ -56,7 +54,7 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Limit(lastNRates).Related(&rates)
 	}
 	if currency.ID == 0 {
-		return nil, errors.New("currency not found")
+		return nil, app.ErrNotFound
 	}
 	currency.Rates = rates
 	return &currency, nil
@@ -68,7 +66,7 @@ func (repo *RDBMSRepo) Update(id uint, currencyNew *app.Currency) (*app.Currency
 	currency := &app.Currency{}
 	repo.DB.First(currency, "id = ?", id)
 	if currency.ID == 0 {
-		return nil, errors.New("currency not found")
+		return nil, app.ErrNotFound
 	}
 	currencyNew.ID = id
 	repo.DB.Model(currency).Updates(app.Currency{
@@ -84,7 +82,7 @@ func (repo *RDBMSRepo) Store(currency *app.Currency) error {
 	repo.DB.First(currency, "currencies.from = ? AND currencies.to = ?", currency.From, currency.To)
 	ok := repo.DB.NewRecord(currency)
 	if !ok {
-		return errors.New("currency exist")
+		return app.ErrExist
 	}
 	repo.DB.Create(currency)
 	return nil

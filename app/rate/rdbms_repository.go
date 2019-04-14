@@ -1,7 +1,6 @@
 package rate
 
 import (
-	"errors"
 	"time"
 
 	"github.com/deryrahman/foreign-currency/app"
@@ -46,7 +45,7 @@ func (repo *RDBMSRepo) Store(rate *app.Rate) error {
 	repo.DB.First(rate, "rates.date = ?", rate.Date)
 	ok := repo.DB.NewRecord(rate)
 	if !ok {
-		return errors.New("rate exist")
+		return app.ErrExist
 	}
 	repo.DB.Create(rate)
 	return nil
