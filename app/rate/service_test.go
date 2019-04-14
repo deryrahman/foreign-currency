@@ -137,3 +137,18 @@ func TestCalculateVar_zeroRates(t *testing.T) {
 	want := float32(-1)
 	assertFloat(t, got, want)
 }
+
+func TestCreateRate(t *testing.T) {
+	rateRepo := &RateRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	rateService := CreateService(rateRepo, currencyRepo)
+	ti := time.Now()
+	rateReq := app.RateRequest{
+		Date:      &ti,
+		From:      "USD",
+		To:        "SGD",
+		RateValue: 0.8,
+	}
+	rateService.CreateRate(&rateReq)
+	assertBool(t, rateRepo.StoreFn, true)
+}
