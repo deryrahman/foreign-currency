@@ -41,9 +41,13 @@ func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
 		rates, _ := trackService.RateRepo.FetchBetweenDate(currencies[i].ID, &dateBegin, &dateEnd)
 		from := currencies[i].From
 		to := currencies[i].To
-		// TODO calculate insufficient data
-		rateValue := rates[0].RateValue
-		avg := float32(0) // TODO: calculate avg given rate
+		// Insufficient data
+		rateValue := float32(-1)
+		avg := float32(-1)
+		if len(rates) >= 7 {
+			rateValue = rates[0].RateValue
+			avg = trackService.calculateAvg(rates)
+		}
 		if currencies[i].TrackedRev {
 			tmp := from
 			from = to
@@ -62,7 +66,7 @@ func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
 	return result, nil
 }
 
-func (trackService *Service) calculateAvg(rates []app.Rate) float32 {
+func (trackService *Service) calculateAvg(rates []*app.Rate) float32 {
 	if len(rates) == 0 {
 		return -1
 	}
