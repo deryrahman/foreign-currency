@@ -7,6 +7,7 @@
 ```
 $ docker-compose up --build
 ```
+4. By default, it will run on port 8000, `localhost:8000`
 
 ## Setup without Docker
 1. Change `config.example.json` to `config.json`, and change the configuration
@@ -17,6 +18,7 @@ $ docker-compose up --build
 $ make build
 $ make start
 ```
+4. By default, it will run on port 8000, `localhost:8000`
 
 ## Testing (without Docker only)
 1. Make sure you have mysql running on your machine
