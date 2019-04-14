@@ -62,6 +62,17 @@ func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
 	return result, nil
 }
 
+func (trackService *Service) calculateAvg(rates []app.Rate) float32 {
+	if len(rates) == 0 {
+		return -1
+	}
+	result := float32(0)
+	for i := range rates {
+		result += rates[i].RateValue
+	}
+	return result / float32(len(rates))
+}
+
 // CreateTrack is a method that receive parameter "from" and "to" currency symbol
 // If "to" is less than "from" lexicographically, then save it with revert true, false otherwise
 func (trackService *Service) CreateTrack(from, to string) error {
