@@ -1,6 +1,8 @@
 package track
 
 import (
+	"time"
+
 	"github.com/deryrahman/foreign-currency/app"
 )
 
@@ -25,7 +27,39 @@ func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyReposit
 // TrackResponse consist of ID, From, To, RateValue, and Avg from the last 7 days before date
 // If it don't have sufficient data, throw an error
 func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
-	return nil, nil
+	dateEnd, err := time.Parse(trackService.DateLayout, date)
+	if err != nil {
+		return nil, err
+	}
+	dateBegin := dateEnd.AddDate(0, 0, -7)
+	currencies, err := trackService.CurrencyRepo.FetchTracked()
+	if err != nil {
+		return nil, err
+	}
+	result := []*app.TrackResponse{}
+	for i := range currencies {
+		rates, _ := trackService.RateRepo.FetchBetweenDate(currencies[i].ID, &dateBegin, &dateEnd)
+		from := currencies[i].From
+		to := currencies[i].To
+		// TODO calculate insufficient data
+		rateValue := rates[0].RateValue
+		avg := float32(0) // TODO: calculate avg given rate
+		if currencies[i].TrackedRev {
+			tmp := from
+			from = to
+			to = tmp
+			rateValue = 1 / rateValue
+			avg = 1 / avg
+		}
+		result = append(result, &app.TrackResponse{
+			ID:        currencies[i].ID,
+			From:      from,
+			To:        to,
+			RateValue: rateValue,
+			Avg:       avg,
+		})
+	}
+	return result, nil
 }
 
 // CreateTrack is a method that receive parameter "from" and "to" currency symbol

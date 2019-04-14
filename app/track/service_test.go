@@ -1,6 +1,7 @@
 package track
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -29,9 +30,14 @@ func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Cu
 	return nil, nil
 }
 func (repo *CurrencyRepoMock) FetchTracked() ([]*app.Currency, error) {
-	return nil, nil
+	repo.FetchTrackedFn = true
+	return []*app.Currency{
+		&app.Currency{ID: 1, From: "USD", To: "SGD", Tracked: true, TrackedRev: false},
+		&app.Currency{ID: 2, From: "USD", To: "IDR", Tracked: true, TrackedRev: true},
+	}, nil
 }
 func (repo *CurrencyRepoMock) Update(uint, *app.Currency) (*app.Currency, error) {
+	repo.UpdateFn = true
 	return nil, nil
 }
 func (repo *CurrencyRepoMock) Store(*app.Currency) error {
@@ -45,7 +51,23 @@ func (repo *RateRepoMock) Fetch() ([]*app.Rate, error) {
 }
 func (repo *RateRepoMock) FetchBetweenDate(uint, *time.Time, *time.Time) ([]*app.Rate, error) {
 	repo.FetchBetweenDateFn = true
-	return nil, nil
+	dates := []time.Time{}
+	for i := 0; i < 10; i++ {
+		ti, _ := time.Parse("2006-01-02", fmt.Sprintf("2010-06-%0d", 1+i))
+		dates = append(dates, ti)
+	}
+	return []*app.Rate{
+		&app.Rate{ID: 1, Date: &dates[0], RateValue: 1.1, CurrencyID: 1},
+		&app.Rate{ID: 2, Date: &dates[1], RateValue: 1.2, CurrencyID: 1},
+		&app.Rate{ID: 3, Date: &dates[2], RateValue: 1.3, CurrencyID: 1},
+		&app.Rate{ID: 4, Date: &dates[3], RateValue: 1.4, CurrencyID: 1},
+		&app.Rate{ID: 5, Date: &dates[4], RateValue: 1.5, CurrencyID: 1},
+		&app.Rate{ID: 6, Date: &dates[5], RateValue: 1.6, CurrencyID: 1},
+		&app.Rate{ID: 7, Date: &dates[6], RateValue: 1.7, CurrencyID: 1},
+		&app.Rate{ID: 8, Date: &dates[7], RateValue: 1.8, CurrencyID: 1},
+		&app.Rate{ID: 9, Date: &dates[8], RateValue: 1.9, CurrencyID: 1},
+		&app.Rate{ID: 10, Date: &dates[9], RateValue: 2.0, CurrencyID: 1},
+	}, nil
 }
 func (repo *RateRepoMock) Store(*app.Rate) error {
 	repo.StoreFn = true
@@ -64,5 +86,6 @@ func TestTracks(t *testing.T) {
 	trackService := CreateService(rateRepo, currencyRepo)
 
 	trackService.Tracks("2019-03-14")
+	assertBool(t, currencyRepo.FetchTrackedFn, true)
 	assertBool(t, rateRepo.FetchBetweenDateFn, true)
 }
