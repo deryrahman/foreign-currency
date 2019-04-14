@@ -117,3 +117,13 @@ func TestCalculateAvg(t *testing.T) {
 	want := float32(1+4) / float32(2)
 	assertFloat(t, got, want)
 }
+func TestCalculateAvg_zeroRates(t *testing.T) {
+	rateRepo := &RateRepoMock{false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
+	trackService := CreateService(rateRepo, currencyRepo)
+
+	rates := []app.Rate{}
+	got := trackService.calculateAvg(rates)
+	want := float32(-1)
+	assertFloat(t, got, want)
+}
