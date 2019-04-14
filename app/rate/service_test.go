@@ -61,6 +61,13 @@ func assertBool(t *testing.T, got, want bool) {
 		t.Errorf("got '%v' want '%v'", got, want)
 	}
 }
+
+func assertFloat(t *testing.T, got, want float32) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%f' want '%f'", got, want)
+	}
+}
 func TestCurrencyRates(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
 	currencyRepo := &CurrencyRepoMock{false, false, false, false}
@@ -95,10 +102,7 @@ func TestCalculateAvg(t *testing.T) {
 	}
 	got := rateService.calculateAvg(rates)
 	want := float32(1+4) / float32(2)
-
-	if got != want {
-		t.Errorf("got '%f' want '%f'", got, want)
-	}
+	assertFloat(t, got, want)
 }
 
 func TestCalculateAvg_zeroRates(t *testing.T) {
@@ -108,8 +112,5 @@ func TestCalculateAvg_zeroRates(t *testing.T) {
 	rates := []app.Rate{}
 	got := rateService.calculateAvg(rates)
 	want := float32(-1)
-
-	if got != want {
-		t.Errorf("got '%f' want '%f'", got, want)
-	}
+	assertFloat(t, got, want)
 }
