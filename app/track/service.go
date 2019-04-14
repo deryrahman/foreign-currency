@@ -1,20 +1,22 @@
 package track
 
-import "github.com/deryrahman/foreign-currency/app"
+import (
+	"github.com/deryrahman/foreign-currency/app"
+)
 
 // Service is struct for implementation of track service
 type Service struct {
-	TrackRepo    app.TrackRepository
 	RateRepo     app.RateRepository
 	CurrencyRepo app.CurrencyRepository
+	DateLayout   string
 }
 
 // CreateService is a constructor for create track service
-func CreateService(trackRepo app.TrackRepository, rateRepo app.RateRepository, currencyRepo app.CurrencyRepository) *Service {
+func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyRepository) *Service {
 	return &Service{
-		TrackRepo:    trackRepo,
 		RateRepo:     rateRepo,
 		CurrencyRepo: currencyRepo,
+		DateLayout:   "2006-01-02",
 	}
 }
 
@@ -33,6 +35,6 @@ func (trackService *Service) CreateTrack(from, to string) error {
 }
 
 // DeleteTrack is a method to delete a track by it's id
-func (trackService *Service) DeleteTrack(uint) (*app.Track, error) {
-	return nil, nil
+func (trackService *Service) DeleteTrack(uint) error {
+	return nil
 }
