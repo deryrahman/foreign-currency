@@ -18,6 +18,7 @@ type CurrencyRepoMock struct {
 	Fail       bool
 	FetchFn    bool
 	FetchOneFn bool
+	UpdateFn   bool
 	StoreFn    bool
 }
 
@@ -37,6 +38,11 @@ func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Cu
 		Rates: []app.Rate{},
 	}, nil
 }
+
+func (repo *CurrencyRepoMock) Update(uint, *app.Currency) (*app.Currency, error) {
+	return nil, nil
+}
+
 func (repo *CurrencyRepoMock) Store(*app.Currency) error {
 	repo.StoreFn = true
 	return nil
@@ -70,7 +76,7 @@ func assertFloat(t *testing.T, got, want float32) {
 }
 func TestCurrencyRates(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 
 	rateService.CurrencyRates("USD", "SGD", 7)
@@ -79,7 +85,7 @@ func TestCurrencyRates(t *testing.T) {
 
 func TestCurrencyRates_fail(t *testing.T) {
 	rateRepo := &RateRepoMock{true, false, false, false}
-	currencyRepo := &CurrencyRepoMock{true, false, false, false}
+	currencyRepo := &CurrencyRepoMock{true, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 
 	currencyResponse, err := rateService.CurrencyRates("USD", "SGD", 7)
@@ -94,7 +100,7 @@ func TestCurrencyRates_fail(t *testing.T) {
 
 func TestCalculateAvg(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 	rates := []app.Rate{
 		app.Rate{ID: 1, RateValue: 1},
@@ -107,7 +113,7 @@ func TestCalculateAvg(t *testing.T) {
 
 func TestCalculateAvg_zeroRates(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 	rates := []app.Rate{}
 	got := rateService.calculateAvg(rates)
@@ -117,7 +123,7 @@ func TestCalculateAvg_zeroRates(t *testing.T) {
 
 func TestCalculateVar(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 	rates := []app.Rate{
 		app.Rate{ID: 1, RateValue: 1},
@@ -130,7 +136,7 @@ func TestCalculateVar(t *testing.T) {
 
 func TestCalculateVar_zeroRates(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 	rates := []app.Rate{}
 	got := rateService.calculateVar(rates)
@@ -140,7 +146,7 @@ func TestCalculateVar_zeroRates(t *testing.T) {
 
 func TestCreateRate(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 	ti := time.Now()
 	rateReq := app.RateRequest{
