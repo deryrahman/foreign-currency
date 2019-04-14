@@ -44,6 +44,9 @@ func (repo *RDBMSRepo) Store(track *app.Track) error {
 func (repo *RDBMSRepo) DeleteByID(id uint) (*app.Track, error) {
 	track := app.Track{}
 	repo.DB.First(&track, "tracks.id = ?", id)
+	if track.ID == 0 {
+		return nil, errors.New("track didn't exist")
+	}
 	repo.DB.Delete(&track)
 	return &track, nil
 }
