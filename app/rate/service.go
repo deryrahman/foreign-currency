@@ -78,6 +78,25 @@ func (rateService *Service) calculateVar(rates []app.Rate) float32 {
 // CreateRate is a method to create daily rate
 // If currency doesn't exist yet, then create one using currency repo
 // create currency, must have "from" less than "to" lexicographically
-func (rateService *Service) CreateRate(*app.RateRequest) error {
-	return nil
+func (rateService *Service) CreateRate(rateRequest *app.RateRequest) error {
+	from := rateRequest.From
+	to := rateRequest.To
+	rateValue := rateRequest.RateValue
+	revert := from > to
+	if revert {
+		tmp := from
+		from = to
+		to = tmp
+		rateValue = 1 / rateValue
+	}
+	currency, err := rateService.CurrencyRepo.FetchOne(from, to, 0)
+	if err != nil {
+		return err
+	}
+	rate := app.Rate{
+		Date:       rateRequest.Date,
+		CurrencyID: currency.ID,
+		RateValue:  rateValue,
+	}
+	return rateService.RateRepo.Store(&rate)
 }
