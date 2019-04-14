@@ -14,10 +14,10 @@ type Rate struct {
 // RateRequest is a used for data structure rate request
 // It consist of attributes Date, From, To, and RateValue
 type RateRequest struct {
-	Date      *time.Time `json:"date"`
-	From      string     `json:"from"`
-	To        string     `json:"to"`
-	RateValue float32    `json:"rate"`
+	Date      string  `json:"date"`
+	From      string  `json:"from"`
+	To        string  `json:"to"`
+	RateValue float32 `json:"rate"`
 }
 
 // RateRepository is an interface for rate repository layer

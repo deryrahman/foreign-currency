@@ -1,16 +1,25 @@
 package rate
 
-import "github.com/deryrahman/foreign-currency/app"
+import (
+	"time"
+
+	"github.com/deryrahman/foreign-currency/app"
+)
 
 // Service is struct for implementation of rate service
 type Service struct {
 	RateRepo     app.RateRepository
 	CurrencyRepo app.CurrencyRepository
+	DateLayout   string
 }
 
 // CreateService is a constructor for create rate service
 func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyRepository) *Service {
-	return &Service{rateRepo, currencyRepo}
+	return &Service{
+		RateRepo:     rateRepo,
+		CurrencyRepo: currencyRepo,
+		DateLayout:   "2006-01-02",
+	}
 }
 
 // CurrencyRates is a method to get currency with their rates
@@ -93,8 +102,9 @@ func (rateService *Service) CreateRate(rateRequest *app.RateRequest) error {
 	if err != nil {
 		return err
 	}
+	ti, _ := time.Parse(rateService.DateLayout, rateRequest.Date)
 	rate := app.Rate{
-		Date:       rateRequest.Date,
+		Date:       &ti,
 		CurrencyID: currency.ID,
 		RateValue:  rateValue,
 	}

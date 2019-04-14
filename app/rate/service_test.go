@@ -153,9 +153,8 @@ func TestCreateRate(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
 	currencyRepo := &CurrencyRepoMock{false, false, false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
-	ti := time.Now()
 	rateReq := app.RateRequest{
-		Date:      &ti,
+		Date:      "2019-02-04",
 		From:      "USD",
 		To:        "SGD",
 		RateValue: 0.8,
