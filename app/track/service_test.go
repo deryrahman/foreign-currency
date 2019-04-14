@@ -53,7 +53,7 @@ func (repo *RateRepoMock) FetchBetweenDate(uint, *time.Time, *time.Time) ([]*app
 	repo.FetchBetweenDateFn = true
 	dates := []time.Time{}
 	for i := 0; i < 10; i++ {
-		ti, _ := time.Parse("2006-01-02", fmt.Sprintf("2010-06-%0d", 1+i))
+		ti, _ := time.Parse("2006-01-02", fmt.Sprintf("2019-03-%0d", 10-i))
 		dates = append(dates, ti)
 	}
 	return []*app.Rate{
@@ -78,6 +78,20 @@ func assertBool(t *testing.T, got, want bool) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got '%v' want '%v'", got, want)
+	}
+}
+
+func assertFloat(t *testing.T, got, want float32) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%f' want '%f'", got, want)
+	}
+}
+
+func assertUint(t *testing.T, got, want uint) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%d' want '%d'", got, want)
 	}
 }
 func TestTracks(t *testing.T) {
