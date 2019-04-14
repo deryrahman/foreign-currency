@@ -30,9 +30,9 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 }
 
 // FetchBetweenDate is a method to fetch all rates within date
-func (repo *RDBMSRepo) FetchBetweenDate(from *time.Time, to *time.Time) ([]*app.Rate, error) {
+func (repo *RDBMSRepo) FetchBetweenDate(currencyID uint, from *time.Time, to *time.Time) ([]*app.Rate, error) {
 	rates := []app.Rate{}
-	repo.DB.Find(&rates, "rates.date BETWEEN ? AND ?", from, to)
+	repo.DB.Find(&rates, "rates.currency_id = ? AND rates.date BETWEEN ? AND ?", currencyID, from, to)
 	result := []*app.Rate{}
 	for i := range rates {
 		result = append(result, &rates[i])

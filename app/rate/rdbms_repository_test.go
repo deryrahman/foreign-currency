@@ -94,7 +94,7 @@ func TestFetchBetweenDate(t *testing.T) {
 	repo := CreateRDBMSRepo(db)
 	from, _ := time.Parse(RFC3339FullDate, "2019-08-01")
 	to, _ := time.Parse(RFC3339FullDate, "2019-08-15")
-	gots, _ := repo.FetchBetweenDate(&from, &to)
+	gots, _ := repo.FetchBetweenDate(1, &from, &to)
 	assertInt(t, len(gots), 4)
 	for i := range gots {
 		assertUint(t, gots[i].ID, uint(i+1))

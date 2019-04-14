@@ -23,7 +23,7 @@ type RateRequest struct {
 // RateRepository is an interface for rate repository layer
 type RateRepository interface {
 	Fetch() ([]*Rate, error)
-	FetchBetweenDate(*time.Time, *time.Time) ([]*Rate, error)
+	FetchBetweenDate(uint, *time.Time, *time.Time) ([]*Rate, error)
 	Store(*Rate) error
 }
 

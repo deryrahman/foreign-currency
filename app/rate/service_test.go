@@ -46,7 +46,7 @@ func (repo *RateRepoMock) Fetch() ([]*app.Rate, error) {
 	repo.FetchFn = true
 	return nil, nil
 }
-func (repo *RateRepoMock) FetchBetweenDate(*time.Time, *time.Time) ([]*app.Rate, error) {
+func (repo *RateRepoMock) FetchBetweenDate(uint, *time.Time, *time.Time) ([]*app.Rate, error) {
 	repo.FetchBetweenDateFn = true
 	return nil, nil
 }
