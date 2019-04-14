@@ -73,6 +73,7 @@ func (h *HTTPHandler) PostRates(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 // GetTracks is a method to get all tracks
@@ -125,6 +126,7 @@ func (h *HTTPHandler) PostTracks(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 // DeleteTracks is a method to remove currency rate to be tracked
@@ -148,4 +150,5 @@ func (h *HTTPHandler) DeleteTracks(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
+	w.WriteHeader(http.StatusNoContent)
 }
