@@ -27,7 +27,10 @@ func (repo *CurrencyRepoMock) Fetch() ([]*app.Currency, error) {
 }
 func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	repo.FetchOneFn = true
-	return &app.Currency{ID: 1, From: "USD", To: "SGD", Tracked: true, TrackedRev: false}, nil
+	if from == "SGD" && to == "USD" {
+		return &app.Currency{ID: 1, From: "SGD", To: "USD", Tracked: true, TrackedRev: false}, nil
+	}
+	return &app.Currency{ID: 1, From: from, To: to, Tracked: true, TrackedRev: true}, nil
 }
 func (repo *CurrencyRepoMock) FetchTracked() ([]*app.Currency, error) {
 	repo.FetchTrackedFn = true
@@ -37,6 +40,7 @@ func (repo *CurrencyRepoMock) FetchTracked() ([]*app.Currency, error) {
 	}, nil
 }
 func (repo *CurrencyRepoMock) Update(uint, *app.Currency) (*app.Currency, error) {
+
 	repo.UpdateFn = true
 	return nil, nil
 }
@@ -134,5 +138,14 @@ func TestCreateTrack(t *testing.T) {
 	trackService := CreateService(rateRepo, currencyRepo)
 
 	trackService.CreateTrack("USD", "SGD")
+	assertBool(t, currencyRepo.UpdateFn, true)
+}
+
+func TestDeleteTrack(t *testing.T) {
+	rateRepo := &RateRepoMock{false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
+	trackService := CreateService(rateRepo, currencyRepo)
+
+	trackService.DeleteTrack("USD", "IDR")
 	assertBool(t, currencyRepo.UpdateFn, true)
 }

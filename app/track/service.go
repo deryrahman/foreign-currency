@@ -1,6 +1,7 @@
 package track
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/deryrahman/foreign-currency/app"
@@ -90,6 +91,7 @@ func (trackService *Service) CreateTrack(from, to string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%v\n", currency)
 	if currency.Tracked && !revert {
 		return nil
 	}
@@ -107,6 +109,27 @@ func (trackService *Service) CreateTrack(from, to string) error {
 
 // DeleteTrack is a method to delete a track by it's id
 func (trackService *Service) DeleteTrack(from, to string) error {
-	// currency := app.Currency{}
-	return nil
+	revert := from > to
+	if from > to {
+		tmp := from
+		from = to
+		to = tmp
+	}
+	currency, err := trackService.CurrencyRepo.FetchOne(from, to, 0)
+	if err != nil {
+		return err
+	}
+	if !currency.Tracked && !revert {
+		return nil
+	}
+	if !currency.TrackedRev && revert {
+		return nil
+	}
+	if revert {
+		currency.TrackedRev = false
+	} else {
+		currency.Tracked = false
+	}
+	_, err = trackService.CurrencyRepo.Update(currency.ID, currency)
+	return err
 }
