@@ -137,7 +137,7 @@ func TestCreateTrack(t *testing.T) {
 	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
 	trackService := CreateService(rateRepo, currencyRepo)
 
-	trackService.CreateTrack("USD", "SGD")
+	trackService.CreateTrack(&app.TrackRequest{"USD", "SGD"})
 	assertBool(t, currencyRepo.UpdateFn, true)
 }
 

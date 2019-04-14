@@ -10,9 +10,16 @@ type TrackResponse struct {
 	Avg       float32 `json:"avg"`
 }
 
+// TrackRequest is used for data structure requesting track
+// It consist of attributes From and To
+type TrackRequest struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+}
+
 // TrackService is an interface for track bussiness logic layer
 type TrackService interface {
 	Tracks(date string) ([]*TrackResponse, error)
-	CreateTrack(from, to string) error
+	CreateTrack(*TrackRequest) error
 	DeleteTrack(from, to string) error
 }
