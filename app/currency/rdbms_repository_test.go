@@ -71,6 +71,29 @@ func TestFetch(t *testing.T) {
 	assertString(t, gots[0].To, currencies[0].To)
 }
 
+func TestFetchTracked(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD", Tracked: true, TrackedRev: false},
+		app.Currency{From: "USD", To: "IDR", Tracked: true, TrackedRev: true},
+		app.Currency{From: "USD", To: "JPY", Tracked: false, TrackedRev: false},
+	}
+	for i := range currencies {
+		db.Create(&currencies[i])
+	}
+
+	repo := CreateRDBMSRepo(db)
+	gots, _ := repo.FetchTracked()
+	assertInt(t, len(gots), 2)
+	assertUint(t, gots[0].ID, 1)
+	assertString(t, gots[0].From, currencies[0].From)
+	assertString(t, gots[0].To, currencies[0].To)
+	assertUint(t, gots[1].ID, 2)
+	assertString(t, gots[1].From, currencies[1].From)
+	assertString(t, gots[1].To, currencies[1].To)
+}
+
 func TestFetchOne_fullRates(t *testing.T) {
 	db := newDB(t)
 	defer db.Close()
