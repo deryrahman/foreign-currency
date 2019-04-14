@@ -34,7 +34,7 @@ func (service *TrackServiceMock) Tracks(date string) ([]*app.TrackResponse, erro
 	service.TracksFn = true
 	return nil, nil
 }
-func (service *TrackServiceMock) CreateTrack(from, to string) error {
+func (service *TrackServiceMock) CreateTrack(*app.TrackRequest) error {
 	service.CreateTrackFn = true
 	return nil
 }
@@ -79,4 +79,16 @@ func TestPostRates(t *testing.T) {
 
 	h.PostRates(response, request)
 	assertBool(t, rateService.CreateRateFn, true)
+}
+
+func TestGetTracks(t *testing.T) {
+	rateService := &RateServiceMock{false, false}
+	trackService := &TrackServiceMock{false, false, false}
+	h := CreateHTTPHandler(rateService, trackService)
+
+	request, _ := http.NewRequest(http.MethodGet, "/tracks?date=2019-10-11", nil)
+	response := httptest.NewRecorder()
+
+	h.GetTracks(response, request)
+	assertBool(t, trackService.TracksFn, true)
 }
