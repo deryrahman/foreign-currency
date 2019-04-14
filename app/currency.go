@@ -27,6 +27,7 @@ type CurrencyResponse struct {
 // CurrencyRepository is an interface for currency repository layer
 type CurrencyRepository interface {
 	Fetch() ([]*Currency, error)
+	FetchTracked() ([]*Currency, error)
 	FetchOne(from, to string, lastNRates int) (*Currency, error)
 	Update(uint, *Currency) (*Currency, error)
 	Store(*Currency) error
