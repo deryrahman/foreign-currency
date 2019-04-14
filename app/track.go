@@ -25,7 +25,7 @@ type TrackResponse struct {
 type TrackRepository interface {
 	Fetch() ([]*Track, error)
 	Store(*Track) error
-	DeleteById(uint) (*Track, error)
+	DeleteByID(uint) (*Track, error)
 }
 
 // TrackService is an interface for track bussiness logic layer
