@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// RDBMSRepo is a struct to wrap its DB
 type RDBMSRepo struct {
 	DB *gorm.DB
 }
