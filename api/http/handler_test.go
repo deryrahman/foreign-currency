@@ -109,3 +109,15 @@ func TestPostTracks(t *testing.T) {
 	h.PostTracks(response, request)
 	assertBool(t, trackService.CreateTrackFn, true)
 }
+
+func TestDeleteTracks(t *testing.T) {
+	rateService := &RateServiceMock{false, false}
+	trackService := &TrackServiceMock{false, false, false}
+	h := CreateHTTPHandler(rateService, trackService)
+
+	request, _ := http.NewRequest(http.MethodDelete, "/tracks?from=USD&to=SGD", nil)
+	response := httptest.NewRecorder()
+
+	h.DeleteTracks(response, request)
+	assertBool(t, trackService.DeleteTrackFn, true)
+}
