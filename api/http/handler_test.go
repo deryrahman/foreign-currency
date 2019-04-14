@@ -1,6 +1,8 @@
 package customhttp
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -57,4 +59,24 @@ func TestGetRates(t *testing.T) {
 
 	h.GetRates(response, request)
 	assertBool(t, rateService.CurrencyRatesFn, true)
+}
+
+func TestPostRates(t *testing.T) {
+	rateService := &RateServiceMock{false, false}
+	trackService := &TrackServiceMock{false, false, false}
+	h := CreateHTTPHandler(rateService, trackService)
+
+	s, _ := json.Marshal(&app.RateRequest{
+		Date:      "2019-01-02",
+		From:      "USD",
+		To:        "SGD",
+		RateValue: 0.5,
+	})
+	b := bytes.NewBuffer(s)
+
+	request, _ := http.NewRequest(http.MethodPost, "/rates", b)
+	response := httptest.NewRecorder()
+
+	h.PostRates(response, request)
+	assertBool(t, rateService.CreateRateFn, true)
 }
