@@ -33,7 +33,6 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
 // It should pass parameter "from", "to", and "lastNRates"
 // "from" is always less than "to" lexicographically
 // If lastNRates is negative, return all Rates, get latest N rates otherwise
-// It should return ErrNotFound if currency didn't found
 func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	currency := app.Currency{}
 	rates := []app.Rate{}
@@ -48,8 +47,20 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 	return &currency, nil
 }
 
-func (repo *RDBMSRepo) Update(id uint, currency *app.Currency) (*app.Currency, error) {
-	return nil, nil
+// Update is a method to toggle tracked and trackedRev currency
+// It will throw an error if currency not found
+func (repo *RDBMSRepo) Update(id uint, currencyNew *app.Currency) (*app.Currency, error) {
+	currency := &app.Currency{}
+	repo.DB.First(currency, "id = ?", id)
+	if currency.ID == 0 {
+		return nil, errors.New("currency not found")
+	}
+	currencyNew.ID = id
+	repo.DB.Model(currency).Updates(app.Currency{
+		Tracked:    currencyNew.Tracked,
+		TrackedRev: currencyNew.TrackedRev,
+	})
+	return currencyNew, nil
 }
 
 // Store is a method to store new currency into database
