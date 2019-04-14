@@ -54,17 +54,20 @@ func (repo *RateRepoMock) Store(*app.Rate) error {
 	repo.StoreFn = true
 	return nil
 }
+
+func assertBool(t *testing.T, got, want bool) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%v' want '%v'", got, want)
+	}
+}
 func TestCurrencyRates(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
 	currencyRepo := &CurrencyRepoMock{false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 
 	rateService.CurrencyRates("USD", "SGD", 7)
-	got := currencyRepo.FetchOneFn
-	want := true
-	if got != want {
-		t.Errorf("got '%v' want '%v'", got, want)
-	}
+	assertBool(t, currencyRepo.FetchOneFn, true)
 }
 
 func TestCurrencyRates_fail(t *testing.T) {
@@ -73,11 +76,7 @@ func TestCurrencyRates_fail(t *testing.T) {
 	rateService := CreateService(rateRepo, currencyRepo)
 
 	currencyResponse, err := rateService.CurrencyRates("USD", "SGD", 7)
-	got := currencyRepo.FetchOneFn
-	want := false
-	if got != want {
-		t.Errorf("got '%v' want '%v'", got, want)
-	}
+	assertBool(t, currencyRepo.FetchOneFn, false)
 	if currencyResponse != nil {
 		t.Errorf("should nil, got '%v'", currencyResponse)
 	}
