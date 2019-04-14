@@ -48,6 +48,10 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 	return &currency, nil
 }
 
+func (repo *RDBMSRepo) Update(id uint, currency *app.Currency) (*app.Currency, error) {
+	return nil, nil
+}
+
 // Store is a method to store new currency into database
 // If there's existing currency (same from and date), this method will throw error
 func (repo *RDBMSRepo) Store(currency *app.Currency) error {

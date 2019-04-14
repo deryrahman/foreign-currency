@@ -28,6 +28,13 @@ func newDB(t *testing.T) *gorm.DB {
 	return db
 }
 
+func assertBool(t *testing.T, got, want bool) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%v' want '%v'", got, want)
+	}
+}
+
 func assertString(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
@@ -160,6 +167,22 @@ func TestFetchOne_zeroRates(t *testing.T) {
 	assertString(t, got.From, currencies[0].From)
 	assertString(t, got.To, currencies[0].To)
 	assertInt(t, len(got.Rates), 0)
+}
+
+func TestUpdate(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{From: "USD", To: "SGD", Tracked: false, TrackedRev: false},
+	}
+	db.Create(&currencies[0])
+	repo := CreateRDBMSRepo(db)
+
+	currencies[0].Tracked = true
+	got, _ := repo.Update(1, &currencies[0])
+	assertUint(t, got.ID, 1)
+	assertBool(t, got.Tracked, true)
 }
 
 func TestStore(t *testing.T) {
