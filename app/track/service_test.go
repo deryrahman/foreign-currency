@@ -127,3 +127,12 @@ func TestCalculateAvg_zeroRates(t *testing.T) {
 	want := float32(-1)
 	assertFloat(t, got, want)
 }
+
+func TestCreateTrack(t *testing.T) {
+	rateRepo := &RateRepoMock{false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false, false}
+	trackService := CreateService(rateRepo, currencyRepo)
+
+	trackService.CreateTrack("USD", "SGD")
+	assertBool(t, currencyRepo.UpdateFn, true)
+}
