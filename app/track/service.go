@@ -106,6 +106,7 @@ func (trackService *Service) CreateTrack(from, to string) error {
 }
 
 // DeleteTrack is a method to delete a track by it's id
-func (trackService *Service) DeleteTrack(uint) error {
+func (trackService *Service) DeleteTrack(from, to string) error {
+	// currency := app.Currency{}
 	return nil
 }

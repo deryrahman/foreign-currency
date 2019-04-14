@@ -14,5 +14,5 @@ type TrackResponse struct {
 type TrackService interface {
 	Tracks(date string) ([]*TrackResponse, error)
 	CreateTrack(from, to string) error
-	DeleteTrack(uint) error
+	DeleteTrack(from, to string) error
 }
