@@ -26,8 +26,8 @@ func (rateService *Service) CurrencyRates(from, to string, lastNRates int) (*app
 		ID:    currency.ID,
 		From:  currency.From,
 		To:    currency.To,
-		Avg:   0, // TODO Calculate avg
-		Var:   2, // TODO Calculate var
+		Avg:   rateService.calculateAvg(currency.Rates),
+		Var:   rateService.calculateVar(currency.Rates),
 		Rates: currency.Rates,
 	}
 	return currencyResponse, nil
