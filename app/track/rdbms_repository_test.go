@@ -80,3 +80,46 @@ func TestFetch(t *testing.T) {
 		assertUint(t, gots[i].CurrencyID, currencies[i].ID)
 	}
 }
+
+func TestStore(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{
+			From: "SGD",
+			To:   "USD",
+		},
+		app.Currency{
+			From: "IDR",
+			To:   "USD",
+		},
+		app.Currency{
+			From: "JPY",
+			To:   "USD",
+		},
+	}
+	for i := range currencies {
+		db.Create(&currencies[i])
+	}
+	tracks := []app.Track{
+		app.Track{
+			CurrencyID: currencies[0].ID,
+		},
+		app.Track{
+			CurrencyID: currencies[1].ID,
+		},
+	}
+
+	repo := CreateRDBMSRepo(db)
+	for i := range tracks {
+		repo.Store(&tracks[i])
+	}
+	gots := []app.Track{}
+	db.Find(&gots)
+	assertInt(t, len(gots), len(tracks))
+	for i := range gots {
+		assertUint(t, gots[i].ID, uint(i+1))
+		assertUint(t, gots[i].CurrencyID, tracks[i].CurrencyID)
+	}
+}
