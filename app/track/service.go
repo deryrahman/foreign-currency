@@ -45,7 +45,7 @@ func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
 		rateValue := float32(-1)
 		avg := float32(-1)
 		if len(rates) >= 7 {
-			rateValue = rates[0].RateValue
+			rateValue = rates[6].RateValue
 			avg = trackService.calculateAvg(rates)
 		}
 		if currencies[i].Tracked {
