@@ -50,10 +50,10 @@ func main() {
 
 	// ready to serve
 	r := mux.NewRouter()
-	r.HandleFunc("/rates", handler.GetRates).Methods("GET")
-	r.HandleFunc("/rates", handler.PostRates).Methods("POST")
-	r.HandleFunc("/tracks", handler.GetTracks).Methods("GET")
-	r.HandleFunc("/tracks", handler.PostTracks).Methods("POST")
-	r.HandleFunc("/tracks", handler.DeleteTracks).Methods("DELETE")
+	r.HandleFunc("/api/v1/rates", handler.GetRates).Methods("GET")
+	r.HandleFunc("/api/v1/rates", handler.PostRates).Methods("POST")
+	r.HandleFunc("/api/v1/tracks", handler.GetTracks).Methods("GET")
+	r.HandleFunc("/api/v1/tracks", handler.PostTracks).Methods("POST")
+	r.HandleFunc("/api/v1/tracks", handler.DeleteTracks).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", server.Host, server.Port), r))
 }
