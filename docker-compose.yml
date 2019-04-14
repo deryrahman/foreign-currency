@@ -1,0 +1,24 @@
+version: '3'
+services:
+  web:
+    build: .
+    restart: on-failure
+    ports:
+     - "8000:8000"
+    links:
+      - mysql:mysql
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=dev
+      - MYSQL_USER=dery
+      - MYSQL_PASSWORD=rahman
+      - MYSQL_ROOT_PASSWORD=rahman
+    command: --init-file /data/application/init.sql
+    volumes:
+      - ./init.sql:/data/application/init.sql
+    expose:
+      - '3306'
