@@ -126,4 +126,20 @@ func (h *HTTPHandler) PostTracks(w http.ResponseWriter, r *http.Request) {
 // It receive query "from" and "to"
 func (h *HTTPHandler) DeleteTracks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	queries := r.URL.Query()
+	from := queries.Get("from")
+	to := queries.Get("to")
+	err := h.TrackService.DeleteTrack(from, to)
+	if err != nil {
+		if err == app.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err == app.ErrExist {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
 }
