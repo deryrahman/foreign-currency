@@ -26,6 +26,20 @@ func newDB(t *testing.T) *gorm.DB {
 	db.AutoMigrate(&app.Rate{}, &app.Currency{}, &app.Track{})
 	return db
 }
+
+func assertUint(t *testing.T, got, want uint) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%d' want '%d'", got, want)
+	}
+}
+
+func assertInt(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%d' want '%d'", got, want)
+	}
+}
 func TestFetch(t *testing.T) {
 	db := newDB(t)
 	defer db.Close()
@@ -60,7 +74,9 @@ func TestFetch(t *testing.T) {
 
 	repo := CreateRDBMSRepo(db)
 	gots, _ := repo.Fetch()
-	if len(gots) != 2 {
-		t.Errorf("got '%d' want '%d'", len(gots), 2)
+	assertInt(t, len(gots), 2)
+	for i := range gots {
+		assertUint(t, gots[i].ID, uint(i+1))
+		assertUint(t, gots[i].CurrencyID, currencies[i].ID)
 	}
 }
