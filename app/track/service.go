@@ -96,12 +96,6 @@ func (trackService *Service) CreateTrack(trackRequest *app.TrackRequest) error {
 	if err != nil {
 		return err
 	}
-	if currency.Tracked && !revert {
-		return nil
-	}
-	if currency.TrackedRev && revert {
-		return nil
-	}
 	if revert {
 		currency.TrackedRev = true
 	} else {
@@ -122,12 +116,6 @@ func (trackService *Service) DeleteTrack(from, to string) error {
 	currency, err := trackService.CurrencyRepo.FetchOne(from, to, 0)
 	if err != nil {
 		return err
-	}
-	if !currency.Tracked && !revert {
-		return nil
-	}
-	if !currency.TrackedRev && revert {
-		return nil
 	}
 	if revert {
 		currency.TrackedRev = false

@@ -69,9 +69,9 @@ func (repo *RDBMSRepo) Update(id uint, currencyNew *app.Currency) (*app.Currency
 		return nil, app.ErrNotFound
 	}
 	currencyNew.ID = id
-	repo.DB.Model(currency).Updates(app.Currency{
-		Tracked:    currencyNew.Tracked,
-		TrackedRev: currencyNew.TrackedRev,
+	repo.DB.Model(currencyNew).Updates(map[string]interface{}{
+		"tracked":     currencyNew.Tracked,
+		"tracked_rev": currencyNew.TrackedRev,
 	})
 	return currencyNew, nil
 }
