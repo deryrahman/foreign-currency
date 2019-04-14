@@ -1,6 +1,7 @@
 package rate
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -8,11 +9,13 @@ import (
 )
 
 type RateRepoMock struct {
+	Fail               bool
 	FetchFn            bool
 	FetchBetweenDateFn bool
 	StoreFn            bool
 }
 type CurrencyRepoMock struct {
+	Fail       bool
 	FetchFn    bool
 	FetchOneFn bool
 	StoreFn    bool
@@ -23,6 +26,9 @@ func (repo *CurrencyRepoMock) Fetch() ([]*app.Currency, error) {
 	return nil, nil
 }
 func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
+	if repo.Fail {
+		return nil, errors.New("")
+	}
 	repo.FetchOneFn = true
 	return &app.Currency{
 		ID:    1,
@@ -49,8 +55,8 @@ func (repo *RateRepoMock) Store(*app.Rate) error {
 	return nil
 }
 func TestCurrencyRates(t *testing.T) {
-	rateRepo := &RateRepoMock{false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false}
+	rateRepo := &RateRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
 
 	rateService.CurrencyRates("USD", "SGD", 7)
@@ -58,5 +64,24 @@ func TestCurrencyRates(t *testing.T) {
 	want := true
 	if got != want {
 		t.Errorf("got '%v' want '%v'", got, want)
+	}
+}
+
+func TestCurrencyRates_fail(t *testing.T) {
+	rateRepo := &RateRepoMock{true, false, false, false}
+	currencyRepo := &CurrencyRepoMock{true, false, false, false}
+	rateService := CreateService(rateRepo, currencyRepo)
+
+	currencyResponse, err := rateService.CurrencyRates("USD", "SGD", 7)
+	got := currencyRepo.FetchOneFn
+	want := false
+	if got != want {
+		t.Errorf("got '%v' want '%v'", got, want)
+	}
+	if currencyResponse != nil {
+		t.Errorf("should nil, got '%v'", currencyResponse)
+	}
+	if err == nil {
+		t.Errorf("wanted an error")
 	}
 }
