@@ -58,5 +58,6 @@ func main() {
 	r.HandleFunc("/api/v1/tracks", handler.PostTracks).Methods("POST")
 	r.HandleFunc("/api/v1/tracks", handler.DeleteTracks).Methods("DELETE")
 	r.PathPrefix("/").Handler(fs)
+	log.Println("Ready to serve...")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", server.Host, server.Port), cors.AllowAll().Handler(r)))
 }
