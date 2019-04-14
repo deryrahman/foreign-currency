@@ -42,7 +42,7 @@ func (repo *RDBMSRepo) FetchBetweenDate(currencyID uint, from *time.Time, to *ti
 // Store is a method to store new daily rate into database
 // If there's existing rate (same date), this method will throw error
 func (repo *RDBMSRepo) Store(rate *app.Rate) error {
-	repo.DB.First(rate, "rates.date = ?", rate.Date)
+	repo.DB.First(rate, "rates.date = ? AND rates.currency_id = ?", rate.Date, rate.CurrencyID)
 	ok := repo.DB.NewRecord(rate)
 	if !ok {
 		return app.ErrExist

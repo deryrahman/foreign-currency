@@ -99,10 +99,19 @@ func (rateService *Service) CreateRate(rateRequest *app.RateRequest) error {
 		rateValue = 1 / rateValue
 	}
 	currency, err := rateService.CurrencyRepo.FetchOne(from, to, 0)
+	if err == app.ErrNotFound {
+		currency = &app.Currency{
+			From:       from,
+			To:         to,
+			Tracked:    false,
+			TrackedRev: false,
+		}
+		rateService.CurrencyRepo.Store(currency)
+	}
+	ti, err := time.Parse(rateService.DateLayout, rateRequest.Date)
 	if err != nil {
 		return err
 	}
-	ti, _ := time.Parse(rateService.DateLayout, rateRequest.Date)
 	rate := app.Rate{
 		Date:       &ti,
 		CurrencyID: currency.ID,
