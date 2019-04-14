@@ -39,3 +39,5 @@ Rates uses 4 attributes, `"id"` as primary key, `"date"`, `"rate_value"`, and `"
 ## API Documentation
 
 Could be found in folder docs, `swagger.json` for API Documentation.
+1. Open [https://editor.swagger.io](https://editor.swagger.io)
+2. File -> import file, choose `swagger.json` from folder docs
