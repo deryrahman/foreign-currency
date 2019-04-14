@@ -24,7 +24,12 @@ func (repo *CurrencyRepoMock) Fetch() ([]*app.Currency, error) {
 }
 func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	repo.FetchOneFn = true
-	return nil, nil
+	return &app.Currency{
+		ID:    1,
+		From:  "SGD",
+		To:    "USD",
+		Rates: []app.Rate{},
+	}, nil
 }
 func (repo *CurrencyRepoMock) Store(*app.Currency) error {
 	repo.StoreFn = true
