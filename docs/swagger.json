@@ -1,0 +1,288 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This API intended to foreign currency exercise",
+    "version" : "1.0.0",
+    "title" : "Foreign Currency API",
+    "contact" : {
+      "email" : "dery.ra@gmail.com"
+    }
+  },
+  "tags" : [ {
+    "name" : "users",
+    "description" : "Provided for public calls"
+  } ],
+  "paths" : {
+    "/api/v1/rates" : {
+      "get" : {
+        "tags" : [ "users" ],
+        "summary" : "retrieve currency rates",
+        "description" : "By passing parameter query \"from\" and \"to\", you can use it to show most recent 7 data currency rates. Also it calculate average and variability.\n",
+        "operationId" : "getRates",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "description" : "currency symbol. eg. USD",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "currency symbol. eg. SGD",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "currency rates found in database",
+            "schema" : {
+              "$ref" : "#/definitions/Currency"
+            }
+          },
+          "404" : {
+            "description" : "resource not found"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "users" ],
+        "summary" : "adds daily exchange rate",
+        "description" : "Adds daily exchange rate to the system",
+        "operationId" : "postRates",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "rateRequest",
+          "description" : "rate request data format",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/RateRequest"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "daily currency rate created"
+          },
+          "409" : {
+            "description" : "an existing daily currency rate already exists"
+          }
+        }
+      }
+    },
+    "/api/v1/tracks" : {
+      "get" : {
+        "tags" : [ "users" ],
+        "summary" : "retrieve tracks given date query",
+        "description" : "By passing parameter query \"date\", you can use it to show most statistic tracked currency rates in the last 7 days before given date\n",
+        "operationId" : "getTracks",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "query",
+          "description" : "date string with format YYYY-MM-DD",
+          "required" : true,
+          "type" : "string",
+          "format" : "date"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "all currency rates track succesfully loaded",
+            "schema" : {
+              "$ref" : "#/definitions/TrackResponse"
+            }
+          },
+          "404" : {
+            "description" : "resource not found"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "users" ],
+        "summary" : "adds currency symbol to tracked",
+        "description" : "Add currency symbol \"from\" and \"to\" to track\n",
+        "operationId" : "postTracks",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "trackRequest",
+          "description" : "track request data format",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/TrackRequest"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "currency rates sucessfully added to track"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "users" ],
+        "summary" : "delete tracks given query",
+        "description" : "By passing parameter query \"date\", you can use it delete existing tracked currency rates\n",
+        "operationId" : "deleteTracks",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "description" : "currency symbol. eg. USD",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "currency symbol. eg. SGD",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "tracked currency rate sucessfully deleted"
+          },
+          "404" : {
+            "description" : "resource not found"
+          },
+          "500" : {
+            "description" : "internal server error"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Currency" : {
+      "type" : "object",
+      "required" : [ "avg", "from", "id", "rates", "to", "var" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "example" : 2
+        },
+        "from" : {
+          "type" : "string",
+          "example" : "USD"
+        },
+        "to" : {
+          "type" : "string",
+          "example" : "SGD"
+        },
+        "avg" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.3452
+        },
+        "var" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.1984
+        },
+        "rates" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Rate"
+          }
+        }
+      }
+    },
+    "Rate" : {
+      "type" : "object",
+      "required" : [ "currency_id", "date", "id", "rate" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "example" : 4
+        },
+        "date" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2016-08-29T09:12:33.001Z"
+        },
+        "rate" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.1984
+        },
+        "currency_id" : {
+          "type" : "integer",
+          "example" : 2
+        }
+      }
+    },
+    "RateRequest" : {
+      "type" : "object",
+      "required" : [ "date", "from", "rate", "to" ],
+      "properties" : {
+        "date" : {
+          "type" : "string",
+          "format" : "date",
+          "example" : "2016-08-29"
+        },
+        "from" : {
+          "type" : "string",
+          "example" : "USD"
+        },
+        "to" : {
+          "type" : "string",
+          "example" : "SGD"
+        },
+        "rate" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.3452
+        }
+      }
+    },
+    "TrackResponse" : {
+      "type" : "object",
+      "required" : [ "avg", "from", "id", "rate", "to" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "example" : 2
+        },
+        "from" : {
+          "type" : "string",
+          "example" : "USD"
+        },
+        "to" : {
+          "type" : "string",
+          "example" : "SGD"
+        },
+        "rate" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.3452
+        },
+        "avg" : {
+          "type" : "number",
+          "format" : "float",
+          "example" : 0.1452
+        }
+      }
+    },
+    "TrackRequest" : {
+      "type" : "object",
+      "required" : [ "from", "to" ],
+      "properties" : {
+        "from" : {
+          "type" : "string",
+          "example" : "USD"
+        },
+        "to" : {
+          "type" : "string",
+          "example" : "SGD"
+        }
+      }
+    }
+  }
+}
