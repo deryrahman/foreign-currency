@@ -21,7 +21,7 @@ func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo {
 // Fetch is a method to fetch all rates
 func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 	rates := []app.Rate{}
-	repo.DB.Find(&rates)
+	repo.DB.Find(&rates).Order("rates.date DESC")
 	result := []*app.Rate{}
 	for i := range rates {
 		result = append(result, &rates[i])
@@ -32,7 +32,7 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) {
 // FetchBetweenDate is a method to fetch all rates within date
 func (repo *RDBMSRepo) FetchBetweenDate(currencyID uint, from *time.Time, to *time.Time) ([]*app.Rate, error) {
 	rates := []app.Rate{}
-	repo.DB.Find(&rates, "rates.currency_id = ? AND rates.date BETWEEN ? AND ?", currencyID, from, to)
+	repo.DB.Find(&rates, "rates.currency_id = ? AND rates.date BETWEEN ? AND ?", currencyID, from, to).Order("rates.date DESC")
 	result := []*app.Rate{}
 	for i := range rates {
 		result = append(result, &rates[i])
