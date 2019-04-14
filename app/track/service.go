@@ -1,7 +1,6 @@
 package track
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/deryrahman/foreign-currency/app"
@@ -91,7 +90,6 @@ func (trackService *Service) CreateTrack(from, to string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", currency)
 	if currency.Tracked && !revert {
 		return nil
 	}
