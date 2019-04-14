@@ -31,7 +31,6 @@ func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) {
 
 // FetchTracked is a method to fetch all currency with tracked checked,
 // either TrackedRev or Tracked
-// It should return ErrNotFound if currency didn't found
 func (repo *RDBMSRepo) FetchTracked() ([]*app.Currency, error) {
 	currencies := []app.Currency{}
 	repo.DB.Find(&currencies, "currencies.tracked = ? OR currencies.tracked_rev = ?", true, true)
@@ -55,6 +54,9 @@ func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency,
 		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Related(&rates)
 	} else {
 		repo.DB.First(&currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Limit(lastNRates).Related(&rates)
+	}
+	if currency.ID == 0 {
+		return nil, errors.New("currency not found")
 	}
 	currency.Rates = rates
 	return &currency, nil
