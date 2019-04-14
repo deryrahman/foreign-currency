@@ -206,3 +206,17 @@ func TestDeleteByID(t *testing.T) {
 	assertUint(t, got.ID, tracks[0].ID)
 	assertUint(t, got.CurrencyID, tracks[0].CurrencyID)
 }
+
+func TestDeleteByID_notExist(t *testing.T) {
+	db := newDB(t)
+	defer db.Close()
+
+	repo := CreateRDBMSRepo(db)
+	got, err := repo.DeleteByID(1)
+	if err == nil {
+		t.Errorf("wanted an error")
+	}
+	if got != nil {
+		t.Errorf("wanted nil, got %v", got)
+	}
+}
