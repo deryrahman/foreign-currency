@@ -1,0 +1,705 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/deryrahman/foreign-currency/api/http/handler.go (44.8%)</option>
+				
+				<option value="file1">github.com/deryrahman/foreign-currency/app/currency/rdbms_repository.go (94.6%)</option>
+				
+				<option value="file2">github.com/deryrahman/foreign-currency/app/rate/rdbms_repository.go (89.5%)</option>
+				
+				<option value="file3">github.com/deryrahman/foreign-currency/app/rate/service.go (90.2%)</option>
+				
+				<option value="file4">github.com/deryrahman/foreign-currency/app/track/service.go (89.5%)</option>
+				
+				<option value="file5">github.com/deryrahman/foreign-currency/config/config.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package customhttp
+
+import (
+        "encoding/json"
+        "log"
+        "net/http"
+
+        "github.com/deryrahman/foreign-currency/app"
+)
+
+// HTTPHandler is a wrapper of rate service and track service
+type HTTPHandler struct {
+        RateService  app.RateService
+        TrackService app.TrackService
+}
+
+// CreateHTTPHandler is a constructor to create HTTPHandler object
+func CreateHTTPHandler(rateService app.RateService, trackService app.TrackService) *HTTPHandler <span class="cov8" title="1">{
+        return &amp;HTTPHandler{
+                RateService:  rateService,
+                TrackService: trackService,
+        }
+}</span>
+
+// GetRates is a method to get rates
+// It receive query "from" and "to", and will retrive corresponding data of rates details
+func (h *HTTPHandler) GetRates(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        log.Println("GET rates")
+        w.Header().Set("Content-Type", "application/json")
+        queries := r.URL.Query()
+        from := queries.Get("from")
+        to := queries.Get("to")
+        currencyResponse, err := h.RateService.CurrencyRates(from, to, 7)
+        if err != nil </span><span class="cov0" title="0">{
+                if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNotFound)
+                }</span> else<span class="cov0" title="0"> if err == app.ErrExist </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusConflict)
+                }</span> else<span class="cov0" title="0"> {
+                        w.WriteHeader(http.StatusInternalServerError)
+                }</span>
+                <span class="cov0" title="0">errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return</span>
+        }
+        <span class="cov8" title="1">json.NewEncoder(w).Encode(currencyResponse)</span>
+}
+
+// PostRates is a method to create daily rates
+// It will read and parse request body as json and marshaling into RateRequest model
+func (h *HTTPHandler) PostRates(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        log.Println("POST rates")
+        w.Header().Set("Content-Type", "application/json")
+        decoder := json.NewDecoder(r.Body)
+        rateRequest := app.RateRequest{}
+        err := decoder.Decode(&amp;rateRequest)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return
+        }</span>
+        <span class="cov8" title="1">err = h.RateService.CreateRate(&amp;rateRequest)
+        if err != nil </span><span class="cov0" title="0">{
+                if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNotFound)
+                }</span> else<span class="cov0" title="0"> if err == app.ErrExist </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusConflict)
+                }</span> else<span class="cov0" title="0"> {
+                        w.WriteHeader(http.StatusInternalServerError)
+                }</span>
+                <span class="cov0" title="0">errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return</span>
+        }
+}
+
+// GetTracks is a method to get all tracks
+// It receive query "date" with format YYYY-MM-DD
+func (h *HTTPHandler) GetTracks(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        log.Println("GET tracks")
+        w.Header().Set("Content-Type", "application/json")
+        queries := r.URL.Query()
+        date := queries.Get("date")
+        trackResponse, err := h.TrackService.Tracks(date)
+        if err != nil </span><span class="cov0" title="0">{
+                if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNotFound)
+                }</span> else<span class="cov0" title="0"> if err == app.ErrExist </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusConflict)
+                }</span> else<span class="cov0" title="0"> {
+                        w.WriteHeader(http.StatusInternalServerError)
+                }</span>
+                <span class="cov0" title="0">errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return</span>
+        }
+        <span class="cov8" title="1">json.NewEncoder(w).Encode(trackResponse)</span>
+}
+
+// PostTracks is a method to invoke currency rate to be tracked
+// It will read request body as json. Json parameter are "from" and "to"
+func (h *HTTPHandler) PostTracks(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        log.Println("POST tracks")
+        w.Header().Set("Content-Type", "application/json")
+        decoder := json.NewDecoder(r.Body)
+        trackRequest := app.TrackRequest{}
+        err := decoder.Decode(&amp;trackRequest)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return
+        }</span>
+        <span class="cov8" title="1">err = h.TrackService.CreateTrack(&amp;trackRequest)
+        if err != nil </span><span class="cov0" title="0">{
+                if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNotFound)
+                }</span> else<span class="cov0" title="0"> if err == app.ErrExist </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusConflict)
+                }</span> else<span class="cov0" title="0"> {
+                        w.WriteHeader(http.StatusInternalServerError)
+                }</span>
+                <span class="cov0" title="0">errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return</span>
+        }
+}
+
+// DeleteTracks is a method to remove currency rate to be tracked
+// It receive query "from" and "to"
+func (h *HTTPHandler) DeleteTracks(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        log.Println("DELETE tracks")
+        w.Header().Set("Content-Type", "application/json")
+        queries := r.URL.Query()
+        from := queries.Get("from")
+        to := queries.Get("to")
+        err := h.TrackService.DeleteTrack(from, to)
+        if err != nil </span><span class="cov0" title="0">{
+                if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNotFound)
+                }</span> else<span class="cov0" title="0"> if err == app.ErrExist </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusConflict)
+                }</span> else<span class="cov0" title="0"> {
+                        w.WriteHeader(http.StatusInternalServerError)
+                }</span>
+                <span class="cov0" title="0">errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+                json.NewEncoder(w).Encode(errorResponse)
+                return</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package currency
+
+import (
+        "github.com/deryrahman/foreign-currency/app"
+        "github.com/jinzhu/gorm"
+)
+
+// RDBMSRepo is a struct to wrap its DB
+type RDBMSRepo struct {
+        DB *gorm.DB
+}
+
+// CreateRDBMSRepo is used to create new Mysql repository
+func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo <span class="cov8" title="1">{
+        return &amp;RDBMSRepo{db}
+}</span>
+
+// Fetch is a method to fetch all currency that match with query
+// It should return ErrNotFound if currency didn't found
+func (repo *RDBMSRepo) Fetch() ([]*app.Currency, error) <span class="cov8" title="1">{
+        currencies := []app.Currency{}
+        repo.DB.Find(&amp;currencies)
+        result := make([]*app.Currency, len(currencies))
+        for i := range currencies </span><span class="cov8" title="1">{
+                result[i] = &amp;currencies[i]
+        }</span>
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// FetchTracked is a method to fetch all currency with tracked checked,
+// either TrackedRev or Tracked
+func (repo *RDBMSRepo) FetchTracked() ([]*app.Currency, error) <span class="cov8" title="1">{
+        currencies := []app.Currency{}
+        repo.DB.Find(&amp;currencies, "currencies.tracked = ? OR currencies.tracked_rev = ?", true, true)
+        result := make([]*app.Currency, len(currencies))
+        for i := range currencies </span><span class="cov8" title="1">{
+                result[i] = &amp;currencies[i]
+        }</span>
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// FetchOne is a method to fetch one currency pair
+// It should pass parameter "from", "to", and "lastNRates"
+// "from" is always less than "to" lexicographically
+// If lastNRates is negative, return all Rates, get latest N rates otherwise
+func (repo *RDBMSRepo) FetchOne(from, to string, lastNRates int) (*app.Currency, error) <span class="cov8" title="1">{
+        currency := app.Currency{}
+        rates := []app.Rate{}
+        if lastNRates == 0 </span><span class="cov8" title="1">{
+                repo.DB.First(&amp;currency, "currencies.from = ? AND currencies.to = ?", from, to)
+        }</span> else<span class="cov8" title="1"> if lastNRates &lt; 0 </span><span class="cov8" title="1">{
+                repo.DB.First(&amp;currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Related(&amp;rates)
+        }</span> else<span class="cov8" title="1"> {
+                repo.DB.First(&amp;currency, "currencies.from = ? AND currencies.to = ?", from, to).Order("rates.date DESC").Limit(lastNRates).Related(&amp;rates)
+        }</span>
+        <span class="cov8" title="1">if currency.ID == 0 </span><span class="cov0" title="0">{
+                return nil, app.ErrNotFound
+        }</span>
+        <span class="cov8" title="1">currency.Rates = rates
+        return &amp;currency, nil</span>
+}
+
+// Update is a method to toggle tracked and trackedRev currency
+// It will throw an error if currency not found
+func (repo *RDBMSRepo) Update(id uint, currencyNew *app.Currency) (*app.Currency, error) <span class="cov8" title="1">{
+        currency := &amp;app.Currency{}
+        repo.DB.First(currency, "id = ?", id)
+        if currency.ID == 0 </span><span class="cov0" title="0">{
+                return nil, app.ErrNotFound
+        }</span>
+        <span class="cov8" title="1">currencyNew.ID = id
+        repo.DB.Model(currencyNew).Updates(map[string]interface{}{
+                "tracked":     currencyNew.Tracked,
+                "tracked_rev": currencyNew.TrackedRev,
+        })
+        return currencyNew, nil</span>
+}
+
+// Store is a method to store new currency into database
+// If there's existing currency (same from and date), this method will throw error
+func (repo *RDBMSRepo) Store(currency *app.Currency) error <span class="cov8" title="1">{
+        repo.DB.First(currency, "currencies.from = ? AND currencies.to = ?", currency.From, currency.To)
+        ok := repo.DB.NewRecord(currency)
+        if !ok </span><span class="cov8" title="1">{
+                return app.ErrExist
+        }</span>
+        <span class="cov8" title="1">repo.DB.Create(currency)
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package rate
+
+import (
+        "time"
+
+        "github.com/deryrahman/foreign-currency/app"
+        "github.com/jinzhu/gorm"
+)
+
+// RDBMSRepo is a struct to wrap its DB
+type RDBMSRepo struct {
+        DB *gorm.DB
+}
+
+// CreateRDBMSRepo is used to create new RDBMS repository
+func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo <span class="cov8" title="1">{
+        return &amp;RDBMSRepo{db}
+}</span>
+
+// Fetch is a method to fetch all rates
+func (repo *RDBMSRepo) Fetch() ([]*app.Rate, error) <span class="cov8" title="1">{
+        rates := []app.Rate{}
+        repo.DB.Find(&amp;rates).Order("rates.date DESC")
+        result := []*app.Rate{}
+        for i := range rates </span><span class="cov0" title="0">{
+                result = append(result, &amp;rates[i])
+        }</span>
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// FetchBetweenDate is a method to fetch all rates within date
+func (repo *RDBMSRepo) FetchBetweenDate(currencyID uint, from *time.Time, to *time.Time) ([]*app.Rate, error) <span class="cov8" title="1">{
+        rates := []app.Rate{}
+        repo.DB.Find(&amp;rates, "rates.currency_id = ? AND rates.date BETWEEN ? AND ?", currencyID, from, to).Order("rates.date DESC")
+        result := []*app.Rate{}
+        for i := range rates </span><span class="cov0" title="0">{
+                result = append(result, &amp;rates[i])
+        }</span>
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// Store is a method to store new daily rate into database
+// If there's existing rate (same date), this method will throw error
+func (repo *RDBMSRepo) Store(rate *app.Rate) error <span class="cov8" title="1">{
+        repo.DB.First(rate, "rates.date = ? AND rates.currency_id = ?", rate.Date, rate.CurrencyID)
+        ok := repo.DB.NewRecord(rate)
+        if !ok </span><span class="cov8" title="1">{
+                return app.ErrExist
+        }</span>
+        <span class="cov8" title="1">repo.DB.Create(rate)
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package rate
+
+import (
+        "time"
+
+        "github.com/deryrahman/foreign-currency/app"
+)
+
+// Service is struct for implementation of rate service
+type Service struct {
+        RateRepo     app.RateRepository
+        CurrencyRepo app.CurrencyRepository
+        DateLayout   string
+}
+
+// CreateService is a constructor for create rate service
+func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyRepository) *Service <span class="cov8" title="1">{
+        return &amp;Service{
+                RateRepo:     rateRepo,
+                CurrencyRepo: currencyRepo,
+                DateLayout:   "2006-01-02",
+        }
+}</span>
+
+// CurrencyRates is a method to get currency with their rates
+// It has parameter "from", "to", and "lastNRates"
+// lastNRates &lt; 0 will retrieve all rates, lastNRates &gt;= 0 will retrieve recent top lastNRates
+// Before call method fetch on currency repo, "from" should less than "to" lexicographically
+func (rateService *Service) CurrencyRates(from, to string, lastNRates int) (*app.CurrencyResponse, error) <span class="cov8" title="1">{
+        revert := from &gt; to
+        if revert </span><span class="cov8" title="1">{
+                tmp := from
+                from = to
+                to = tmp
+        }</span>
+        <span class="cov8" title="1">currency, err := rateService.CurrencyRepo.FetchOne(from, to, lastNRates)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if revert </span><span class="cov8" title="1">{
+                for i := range currency.Rates </span><span class="cov0" title="0">{
+                        currency.Rates[i].RateValue = 1 / currency.Rates[i].RateValue
+                }</span>
+                <span class="cov8" title="1">tmp := currency.From
+                currency.From = currency.To
+                currency.To = tmp</span>
+        }
+        <span class="cov8" title="1">currencyResponse := &amp;app.CurrencyResponse{
+                ID:    currency.ID,
+                From:  currency.From,
+                To:    currency.To,
+                Avg:   rateService.calculateAvg(currency.Rates),
+                Var:   rateService.calculateVar(currency.Rates),
+                Rates: currency.Rates,
+        }
+        return currencyResponse, nil</span>
+}
+
+func (rateService *Service) calculateAvg(rates []app.Rate) float32 <span class="cov8" title="1">{
+        if len(rates) == 0 </span><span class="cov8" title="1">{
+                return -1
+        }</span>
+        <span class="cov8" title="1">result := float32(0)
+        for i := range rates </span><span class="cov8" title="1">{
+                result += rates[i].RateValue
+        }</span>
+        <span class="cov8" title="1">return result / float32(len(rates))</span>
+}
+
+func (rateService *Service) calculateVar(rates []app.Rate) float32 <span class="cov8" title="1">{
+        if len(rates) == 0 </span><span class="cov8" title="1">{
+                return -1
+        }</span>
+        <span class="cov8" title="1">max := float32(rates[0].RateValue)
+        min := float32(rates[0].RateValue)
+        for _, v := range rates[1:] </span><span class="cov8" title="1">{
+                if v.RateValue &gt; max </span><span class="cov8" title="1">{
+                        max = v.RateValue
+                }</span>
+                <span class="cov8" title="1">if v.RateValue &lt; min </span><span class="cov0" title="0">{
+                        min = v.RateValue
+                }</span>
+        }
+        <span class="cov8" title="1">return max - min</span>
+}
+
+// CreateRate is a method to create daily rate
+// If currency doesn't exist yet, then create one using currency repo
+// create currency, must have "from" less than "to" lexicographically
+func (rateService *Service) CreateRate(rateRequest *app.RateRequest) error <span class="cov8" title="1">{
+        from := rateRequest.From
+        to := rateRequest.To
+        rateValue := rateRequest.RateValue
+        revert := from &gt; to
+        if revert </span><span class="cov8" title="1">{
+                tmp := from
+                from = to
+                to = tmp
+                rateValue = 1 / rateValue
+        }</span>
+        <span class="cov8" title="1">currency, err := rateService.CurrencyRepo.FetchOne(from, to, 0)
+        if err == app.ErrNotFound </span><span class="cov0" title="0">{
+                currency = &amp;app.Currency{
+                        From:       from,
+                        To:         to,
+                        Tracked:    false,
+                        TrackedRev: false,
+                }
+                rateService.CurrencyRepo.Store(currency)
+        }</span>
+        <span class="cov8" title="1">ti, err := time.Parse(rateService.DateLayout, rateRequest.Date)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">rate := app.Rate{
+                Date:       &amp;ti,
+                CurrencyID: currency.ID,
+                RateValue:  rateValue,
+        }
+        return rateService.RateRepo.Store(&amp;rate)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package track
+
+import (
+        "time"
+
+        "github.com/deryrahman/foreign-currency/app"
+)
+
+// Service is struct for implementation of track service
+type Service struct {
+        RateRepo     app.RateRepository
+        CurrencyRepo app.CurrencyRepository
+        DateLayout   string
+}
+
+// CreateService is a constructor for create track service
+func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyRepository) *Service <span class="cov8" title="1">{
+        return &amp;Service{
+                RateRepo:     rateRepo,
+                CurrencyRepo: currencyRepo,
+                DateLayout:   "2006-01-02",
+        }
+}</span>
+
+// Tracks is a method that receive date as a string with format YYYY-MM-DD
+// and will return a TrackResponse object
+// TrackResponse consist of ID, From, To, RateValue, and Avg from the last 7 days before date
+// If it don't have sufficient data, throw an error
+func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) <span class="cov8" title="1">{
+        dateEnd, err := time.Parse(trackService.DateLayout, date)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">dateBegin := dateEnd.AddDate(0, 0, -7)
+        currencies, err := trackService.CurrencyRepo.FetchTracked()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">result := []*app.TrackResponse{}
+        for i := range currencies </span><span class="cov8" title="1">{
+                rates, _ := trackService.RateRepo.FetchBetweenDate(currencies[i].ID, &amp;dateBegin, &amp;dateEnd)
+                from := currencies[i].From
+                to := currencies[i].To
+                // Insufficient data
+                rateValue := float32(-1)
+                avg := float32(-1)
+                if len(rates) &gt;= 7 </span><span class="cov8" title="1">{
+                        rateValue = rates[6].RateValue
+                        avg = trackService.calculateAvg(rates)
+                }</span>
+                <span class="cov8" title="1">if currencies[i].Tracked </span><span class="cov8" title="1">{
+                        result = append(result, &amp;app.TrackResponse{
+                                ID:        currencies[i].ID,
+                                From:      from,
+                                To:        to,
+                                RateValue: rateValue,
+                                Avg:       avg,
+                        })
+                }</span>
+                <span class="cov8" title="1">if currencies[i].TrackedRev </span><span class="cov8" title="1">{
+                        result = append(result, &amp;app.TrackResponse{
+                                ID:        currencies[i].ID,
+                                From:      to,
+                                To:        from,
+                                RateValue: 1 / rateValue,
+                                Avg:       1 / avg,
+                        })
+                }</span>
+        }
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+func (trackService *Service) calculateAvg(rates []*app.Rate) float32 <span class="cov8" title="1">{
+        if len(rates) == 0 </span><span class="cov8" title="1">{
+                return -1
+        }</span>
+        <span class="cov8" title="1">result := float32(0)
+        for i := range rates </span><span class="cov8" title="1">{
+                result += rates[i].RateValue
+        }</span>
+        <span class="cov8" title="1">return result / float32(len(rates))</span>
+}
+
+// CreateTrack is a method that receive parameter "from" and "to" currency symbol
+// If "to" is less than "from" lexicographically, then save it with revert true, false otherwise
+func (trackService *Service) CreateTrack(trackRequest *app.TrackRequest) error <span class="cov8" title="1">{
+        from := trackRequest.From
+        to := trackRequest.To
+        revert := from &gt; to
+        if from &gt; to </span><span class="cov8" title="1">{
+                tmp := from
+                from = to
+                to = tmp
+        }</span>
+        <span class="cov8" title="1">currency, err := trackService.CurrencyRepo.FetchOne(from, to, 0)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if revert </span><span class="cov8" title="1">{
+                currency.TrackedRev = true
+        }</span> else<span class="cov0" title="0"> {
+                currency.Tracked = true
+        }</span>
+        <span class="cov8" title="1">_, err = trackService.CurrencyRepo.Update(currency.ID, currency)
+        return err</span>
+}
+
+// DeleteTrack is a method to delete a track by it's id
+func (trackService *Service) DeleteTrack(from, to string) error <span class="cov8" title="1">{
+        revert := from &gt; to
+        if from &gt; to </span><span class="cov8" title="1">{
+                tmp := from
+                from = to
+                to = tmp
+        }</span>
+        <span class="cov8" title="1">currency, err := trackService.CurrencyRepo.FetchOne(from, to, 0)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if revert </span><span class="cov8" title="1">{
+                currency.TrackedRev = false
+        }</span> else<span class="cov0" title="0"> {
+                currency.Tracked = false
+        }</span>
+        <span class="cov8" title="1">_, err = trackService.CurrencyRepo.Update(currency.ID, currency)
+        return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package config
+
+import (
+        "encoding/json"
+        "os"
+)
+
+// Configuration is a struct for configuration
+// It contains server and database configuration
+type Configuration struct {
+        Server       *server
+        DatabaseDev  *database
+        DatabaseTest *database
+}
+
+type server struct {
+        Host string
+        Port string
+}
+
+type database struct {
+        Host     string
+        Port     string
+        User     string
+        Password string
+        DBName   string
+}
+
+// ParseJSON is used to parse config json file
+func ParseJSON(filepath string) (*Configuration, error) <span class="cov8" title="1">{
+        file, err := os.Open(filepath)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+        decoder := json.NewDecoder(file)
+        configuration := &amp;Configuration{}
+        err = decoder.Decode(configuration)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return configuration, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
