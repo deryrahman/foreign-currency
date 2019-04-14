@@ -41,6 +41,9 @@ func (repo *RDBMSRepo) Store(track *app.Track) error {
 }
 
 // DeleteByID is method to delete a track by its ID
-func (repo *RDBMSRepo) DeleteByID(uint) (*app.Track, error) {
-	return nil, nil
+func (repo *RDBMSRepo) DeleteByID(id uint) (*app.Track, error) {
+	track := app.Track{}
+	repo.DB.First(&track, "tracks.id = ?", id)
+	repo.DB.Delete(&track)
+	return &track, nil
 }
