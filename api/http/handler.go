@@ -1,6 +1,7 @@
 package customhttp
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/deryrahman/foreign-currency/app"
@@ -24,6 +25,23 @@ func CreateHTTPHandler(rateService app.RateService, trackService app.TrackServic
 // It receive query "from" and "to", and will retrive corresponding data of rates details
 func (h *HTTPHandler) GetRates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	queries := r.URL.Query()
+	from := queries.Get("from")
+	to := queries.Get("to")
+	currencyResponse, err := h.RateService.CurrencyRates(from, to, 7)
+	if err != nil {
+		if err == app.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err == app.ErrExist {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+	json.NewEncoder(w).Encode(currencyResponse)
 }
 
 // PostRates is a method to create daily rates
