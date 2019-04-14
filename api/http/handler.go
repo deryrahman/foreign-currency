@@ -70,13 +70,28 @@ func (h *HTTPHandler) PostRates(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
-	json.NewEncoder(w).Encode(rateRequest)
 }
 
 // GetTracks is a method to get all tracks
 // It receive query "date" with format YYYY-MM-DD
 func (h *HTTPHandler) GetTracks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	queries := r.URL.Query()
+	date := queries.Get("date")
+	trackResponse, err := h.TrackService.Tracks(date)
+	if err != nil {
+		if err == app.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err == app.ErrExist {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+	json.NewEncoder(w).Encode(trackResponse)
 }
 
 // PostTracks is a method to invoke currency rate to be tracked
