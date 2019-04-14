@@ -48,20 +48,24 @@ func (trackService *Service) Tracks(date string) ([]*app.TrackResponse, error) {
 			rateValue = rates[0].RateValue
 			avg = trackService.calculateAvg(rates)
 		}
-		if currencies[i].TrackedRev {
-			tmp := from
-			from = to
-			to = tmp
-			rateValue = 1 / rateValue
-			avg = 1 / avg
+		if currencies[i].Tracked {
+			result = append(result, &app.TrackResponse{
+				ID:        currencies[i].ID,
+				From:      from,
+				To:        to,
+				RateValue: rateValue,
+				Avg:       avg,
+			})
 		}
-		result = append(result, &app.TrackResponse{
-			ID:        currencies[i].ID,
-			From:      from,
-			To:        to,
-			RateValue: rateValue,
-			Avg:       avg,
-		})
+		if currencies[i].TrackedRev {
+			result = append(result, &app.TrackResponse{
+				ID:        currencies[i].ID,
+				From:      to,
+				To:        from,
+				RateValue: 1 / rateValue,
+				Avg:       1 / avg,
+			})
+		}
 	}
 	return result, nil
 }
