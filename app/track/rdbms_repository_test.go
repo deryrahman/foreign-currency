@@ -166,3 +166,43 @@ func TestStore_exist(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteByID(t *testing.T) {
+
+	db := newDB(t)
+	defer db.Close()
+
+	currencies := []app.Currency{
+		app.Currency{
+			From: "SGD",
+			To:   "USD",
+		},
+		app.Currency{
+			From: "IDR",
+			To:   "USD",
+		},
+		app.Currency{
+			From: "JPY",
+			To:   "USD",
+		},
+	}
+	for i := range currencies {
+		db.Create(&currencies[i])
+	}
+	tracks := []app.Track{
+		app.Track{
+			CurrencyID: currencies[0].ID,
+		},
+		app.Track{
+			CurrencyID: currencies[1].ID,
+		},
+	}
+	for i := range tracks {
+		db.Create(&tracks[i])
+	}
+
+	repo := CreateRDBMSRepo(db)
+	got, _ := repo.DeleteByID(tracks[0].ID)
+	assertUint(t, got.ID, tracks[0].ID)
+	assertUint(t, got.CurrencyID, tracks[0].CurrencyID)
+}
