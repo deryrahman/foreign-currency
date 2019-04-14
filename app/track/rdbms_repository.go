@@ -17,7 +17,13 @@ func CreateRDBMSRepo(db *gorm.DB) *RDBMSRepo {
 
 // Fetch is a method to fetch all list of currency track
 func (repo *RDBMSRepo) Fetch() ([]*app.Track, error) {
-	return nil, nil
+	tracks := []app.Track{}
+	repo.DB.Find(&tracks)
+	result := []*app.Track{}
+	for i := range tracks {
+		result = append(result, &tracks[i])
+	}
+	return result, nil
 }
 
 // Store is a method to store currency rate to track
