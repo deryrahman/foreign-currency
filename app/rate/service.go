@@ -18,9 +18,23 @@ func CreateService(rateRepo app.RateRepository, currencyRepo app.CurrencyReposit
 // lastNRates < 0 will retrieve all rates, lastNRates >= 0 will retrieve recent top lastNRates
 // Before call method fetch on currency repo, "from" should less than "to" lexicographically
 func (rateService *Service) CurrencyRates(from, to string, lastNRates int) (*app.CurrencyResponse, error) {
+	revert := from > to
+	if revert {
+		tmp := from
+		from = to
+		to = tmp
+	}
 	currency, err := rateService.CurrencyRepo.FetchOne(from, to, lastNRates)
 	if err != nil {
 		return nil, err
+	}
+	if revert {
+		for i := range currency.Rates {
+			currency.Rates[i].RateValue = 1 / currency.Rates[i].RateValue
+		}
+		tmp := currency.From
+		currency.From = currency.To
+		currency.To = tmp
 	}
 	currencyResponse := &app.CurrencyResponse{
 		ID:    currency.ID,
