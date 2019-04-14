@@ -138,7 +138,7 @@ func TestCalculateVar_zeroRates(t *testing.T) {
 	assertFloat(t, got, want)
 }
 
-func TestCreateRate_dontHaveCurrencyBefore(t *testing.T) {
+func TestCreateRate(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false, false}
 	currencyRepo := &CurrencyRepoMock{false, false, false, false}
 	rateService := CreateService(rateRepo, currencyRepo)
