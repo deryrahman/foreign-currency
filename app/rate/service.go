@@ -33,6 +33,17 @@ func (rateService *Service) CurrencyRates(from, to string, lastNRates int) (*app
 	return currencyResponse, nil
 }
 
+func (rateService *Service) calculateAvg(rates []app.Rate) float32 {
+	if len(rates) == 0 {
+		return -1
+	}
+	result := float32(0)
+	for i := range rates {
+		result += rates[i].RateValue
+	}
+	return result / float32(len(rates))
+}
+
 // CreateRate is a method to create daily rate
 // If currency doesn't exist yet, then create one using currency repo
 // create currency, must have "from" less than "to" lexicographically
