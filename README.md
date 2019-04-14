@@ -28,10 +28,24 @@ $ make build
 $ make test
 ```
 
+## General Architecture
+This project has 4 Domain layer :
+
+- Model Layer
+- Repository Layer
+- Service Layer
+- API Layer
+
+<div style="text-align:center"><img src ="docs/img/architecture.png" /></div>
+
+- Model layer : consist of all domain model within system
+- Repository layer : layer to access database either RDBMS or NoSQL. But, in this implementation, I use MySQL
+- Service layer : all business logic implement here
+- API Layer : how client interact with system. In this implementation, I use HTTP
+
 ## Database Design
 
 <div style="text-align:center"><img src ="docs/img/db.png" /></div>
-<p style="text-align: center;">Database design</p>
 
 It uses 2 tables, currencies and rates. It has cardinality one to many, since one currency can has many daily rates.
 Currencies has special attribute, `"tracked"` and `"tracked_rev"`. These attribute uses for marking currency to be tracked. Currency always store unique pair based on attribute `"from"` and `"to"`. It guarantee by the app that `"from"` is always less than `"to"` lexicographically. If we want to track in reverse order (`"from"` is greater than `"to"`), tracked_rev should be marked as true. This can reduce database storage, since we only store 1 tuple for the same symbols instead of 2.
