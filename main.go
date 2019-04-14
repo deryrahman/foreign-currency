@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -50,10 +51,12 @@ func main() {
 
 	// ready to serve
 	r := mux.NewRouter()
+	fs := http.FileServer(http.Dir("static"))
 	r.HandleFunc("/api/v1/rates", handler.GetRates).Methods("GET")
 	r.HandleFunc("/api/v1/rates", handler.PostRates).Methods("POST")
 	r.HandleFunc("/api/v1/tracks", handler.GetTracks).Methods("GET")
 	r.HandleFunc("/api/v1/tracks", handler.PostTracks).Methods("POST")
 	r.HandleFunc("/api/v1/tracks", handler.DeleteTracks).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", server.Host, server.Port), r))
+	r.PathPrefix("/").Handler(fs)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", server.Host, server.Port), cors.AllowAll().Handler(r)))
 }
