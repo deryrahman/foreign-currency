@@ -15,6 +15,7 @@ type RateRepoMock struct {
 type CurrencyRepoMock struct {
 	FetchFn    bool
 	FetchOneFn bool
+	UpdateFn   bool
 	StoreFn    bool
 }
 
@@ -24,6 +25,9 @@ func (repo *CurrencyRepoMock) Fetch() ([]*app.Currency, error) {
 }
 func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	repo.FetchOneFn = true
+	return nil, nil
+}
+func (repo *CurrencyRepoMock) Update(uint, *app.Currency) (*app.Currency, error) {
 	return nil, nil
 }
 func (repo *CurrencyRepoMock) Store(*app.Currency) error {
@@ -52,7 +56,7 @@ func assertBool(t *testing.T, got, want bool) {
 }
 func TestTracks(t *testing.T) {
 	rateRepo := &RateRepoMock{false, false, false}
-	currencyRepo := &CurrencyRepoMock{false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false}
 	trackService := CreateService(rateRepo, currencyRepo)
 
 	trackService.Tracks("2019-03-14")
