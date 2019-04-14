@@ -27,7 +27,7 @@ func (repo *CurrencyRepoMock) Fetch() ([]*app.Currency, error) {
 }
 func (repo *CurrencyRepoMock) FetchOne(from, to string, lastNRates int) (*app.Currency, error) {
 	repo.FetchOneFn = true
-	return nil, nil
+	return &app.Currency{ID: 1, From: "USD", To: "SGD", Tracked: true, TrackedRev: false}, nil
 }
 func (repo *CurrencyRepoMock) FetchTracked() ([]*app.Currency, error) {
 	repo.FetchTrackedFn = true

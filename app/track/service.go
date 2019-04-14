@@ -80,7 +80,29 @@ func (trackService *Service) calculateAvg(rates []*app.Rate) float32 {
 // CreateTrack is a method that receive parameter "from" and "to" currency symbol
 // If "to" is less than "from" lexicographically, then save it with revert true, false otherwise
 func (trackService *Service) CreateTrack(from, to string) error {
-	return nil
+	revert := from > to
+	if from > to {
+		tmp := from
+		from = to
+		to = tmp
+	}
+	currency, err := trackService.CurrencyRepo.FetchOne(from, to, 0)
+	if err != nil {
+		return err
+	}
+	if currency.Tracked && !revert {
+		return nil
+	}
+	if currency.TrackedRev && revert {
+		return nil
+	}
+	if revert {
+		currency.TrackedRev = true
+	} else {
+		currency.Tracked = true
+	}
+	_, err = trackService.CurrencyRepo.Update(currency.ID, currency)
+	return err
 }
 
 // DeleteTrack is a method to delete a track by it's id
