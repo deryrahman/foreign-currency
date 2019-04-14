@@ -84,3 +84,19 @@ func TestCurrencyRates_fail(t *testing.T) {
 		t.Errorf("wanted an error")
 	}
 }
+
+func TestCalculateAvg(t *testing.T) {
+	rateRepo := &RateRepoMock{false, false, false, false}
+	currencyRepo := &CurrencyRepoMock{false, false, false, false}
+	rateService := CreateService(rateRepo, currencyRepo)
+	rates := []app.Rate{
+		app.Rate{ID: 1, RateValue: 1},
+		app.Rate{ID: 2, RateValue: 4},
+	}
+	got := rateService.calculateAvg(rates)
+	want := float32(1+4) / float32(2)
+
+	if got != want {
+		t.Errorf("got '%f' want '%f'", got, want)
+	}
+}
