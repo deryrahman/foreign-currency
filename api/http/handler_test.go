@@ -92,3 +92,20 @@ func TestGetTracks(t *testing.T) {
 	h.GetTracks(response, request)
 	assertBool(t, trackService.TracksFn, true)
 }
+
+func TestPostTracks(t *testing.T) {
+	rateService := &RateServiceMock{false, false}
+	trackService := &TrackServiceMock{false, false, false}
+	h := CreateHTTPHandler(rateService, trackService)
+	s, _ := json.Marshal(&app.TrackRequest{
+		From: "USD",
+		To:   "SGD",
+	})
+	b := bytes.NewBuffer(s)
+
+	request, _ := http.NewRequest(http.MethodPost, "/tracks", b)
+	response := httptest.NewRecorder()
+
+	h.PostTracks(response, request)
+	assertBool(t, trackService.CreateTrackFn, true)
+}
