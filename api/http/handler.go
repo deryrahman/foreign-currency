@@ -48,6 +48,29 @@ func (h *HTTPHandler) GetRates(w http.ResponseWriter, r *http.Request) {
 // It will read and parse request body as json and marshaling into RateRequest model
 func (h *HTTPHandler) PostRates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	rateRequest := app.RateRequest{}
+	err := decoder.Decode(&rateRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+	err = h.RateService.CreateRate(&rateRequest)
+	if err != nil {
+		if err == app.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err == app.ErrExist {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+	json.NewEncoder(w).Encode(rateRequest)
 }
 
 // GetTracks is a method to get all tracks
