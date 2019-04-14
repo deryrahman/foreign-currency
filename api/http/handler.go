@@ -98,6 +98,28 @@ func (h *HTTPHandler) GetTracks(w http.ResponseWriter, r *http.Request) {
 // It will read request body as json. Json parameter are "from" and "to"
 func (h *HTTPHandler) PostTracks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	trackRequest := app.TrackRequest{}
+	err := decoder.Decode(&trackRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+	err = h.TrackService.CreateTrack(&trackRequest)
+	if err != nil {
+		if err == app.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err == app.ErrExist {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		errorResponse := app.ErrorResponse{ErrMsg: err.Error()}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
 }
 
 // DeleteTracks is a method to remove currency rate to be tracked
